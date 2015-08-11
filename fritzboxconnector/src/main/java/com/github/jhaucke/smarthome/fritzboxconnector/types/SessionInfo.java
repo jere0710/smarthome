@@ -1,9 +1,13 @@
-package de.jere0710.smarthome.fritzboxconnector.jaxb;
+package com.github.jhaucke.smarthome.fritzboxconnector.types;
+
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import com.github.jhaucke.smarthome.fritzboxconnector.types.Rights.Right;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "SessionInfo")
@@ -16,7 +20,7 @@ public class SessionInfo {
 	@XmlElement(name = "BlockTime")
 	private String blockTime;
 	@XmlElement(name = "Rights")
-	private String rights;
+	private Rights rights;
 
 	public String getSid() {
 		return sid;
@@ -30,8 +34,8 @@ public class SessionInfo {
 		return blockTime;
 	}
 
-	public String getRights() {
-		return rights;
+	public List<Right> getRights() {
+		return rights.getRights();
 	}
 
 }

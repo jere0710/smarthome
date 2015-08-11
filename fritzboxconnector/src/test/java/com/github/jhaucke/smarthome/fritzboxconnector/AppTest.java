@@ -1,4 +1,4 @@
-package de.jere0710.smarthome.fritzboxconnector;
+package com.github.jhaucke.smarthome.fritzboxconnector;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

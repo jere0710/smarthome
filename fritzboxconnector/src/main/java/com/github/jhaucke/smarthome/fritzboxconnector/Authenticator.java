@@ -1,4 +1,4 @@
-package de.jere0710.smarthome.fritzboxconnector;
+package com.github.jhaucke.smarthome.fritzboxconnector;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -16,17 +16,14 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
-import de.jere0710.smarthome.fritzboxconnector.jaxb.SessionInfo;
+import com.github.jhaucke.smarthome.fritzboxconnector.types.SessionInfo;
 
 public class Authenticator {
 
 	private static final String DEFAULT_INVALID_SID = "0000000000000000";
 
-	public String getSessionId() throws IOException, JAXBException {
+	public String getNewSessionId(final String username, final String password) throws IOException, JAXBException {
 
-		String username = "";
-		String password = "";
-		
 		CloseableHttpClient client = HttpClientBuilder.create().build();
 		HttpGet httpGetWithoutCredentials = new HttpGet("http://fritz.box/login_sid.lua");
 		CloseableHttpResponse response = null;
@@ -67,7 +64,7 @@ public class Authenticator {
 		return challenge + "-" + getMD5Hash(challenge + "-" + password);
 	}
 
-	public String getMD5Hash(String stringToHash) {
+	private String getMD5Hash(String stringToHash) {
 		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
 			byte[] array = md.digest(stringToHash.getBytes("UTF-16LE"));
