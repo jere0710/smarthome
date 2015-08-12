@@ -9,6 +9,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.github.jhaucke.smarthome.fritzboxconnector.types.Rights.Right;
 
+/**
+ * Type that represents all information about a FritzBox session.
+ */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "SessionInfo")
 public class SessionInfo {

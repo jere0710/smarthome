@@ -10,12 +10,15 @@ import javax.xml.bind.JAXBException;
  */
 public class FritzBoxConnector {
 
-	private final HttpInterface httpInterface;
+	private HttpInterface httpInterface;
 
-	public FritzBoxConnector(final String username, final String password) throws IOException, JAXBException {
+	public FritzBoxConnector(final String username, final String password, final String fritzBoxHostName)
+			throws IOException, JAXBException {
 		super();
 
-		httpInterface = new HttpInterface(new Authenticator().getNewSessionId(username, password));
+		Authenticator authenticator = new Authenticator(fritzBoxHostName);
+		httpInterface = new HttpInterface(authenticator.getNewSessionId(username, password),
+				authenticator.getFritzBoxHostName());
 	}
 
 	public HttpInterface getHttpInterface() {
