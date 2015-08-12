@@ -13,14 +13,12 @@ import com.github.jhaucke.smarthome.fritzboxconnector.HttpInterface;
  */
 public class Collector {
 	public static void main(String[] args) throws IOException, JAXBException {
-		
+
 		FritzBoxConnector fritzBoxConnector = null;
 
 		if (args.length == 2) {
-
 			fritzBoxConnector = new FritzBoxConnector(args[0], args[1], null);
 		} else if (args.length == 3) {
-
 			fritzBoxConnector = new FritzBoxConnector(args[0], args[1], args[2]);
 		}
 

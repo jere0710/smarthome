@@ -20,12 +20,6 @@ public class Authenticator {
 	public String fritzBoxHostName = "fritz.box";
 
 	/**
-	 * Default host name "fritz.box" will be used.
-	 */
-	public Authenticator() {
-	}
-
-	/**
 	 * Constructor for {@link Authenticator}. If the FritzBox uses the default
 	 * host name "fritz.box", {@code null} can be passed.
 	 * 
@@ -34,9 +28,11 @@ public class Authenticator {
 	 */
 	public Authenticator(String fritzBoxHostName) {
 		super();
-		this.fritzBoxHostName = fritzBoxHostName;
-	}
 
+		if (fritzBoxHostName != null) {
+			this.fritzBoxHostName = fritzBoxHostName;
+		}
+	}
 
 	public String getNewSessionId(final String username, final String password) throws IOException, JAXBException {
 
@@ -48,8 +44,8 @@ public class Authenticator {
 		if (sessionInfo.getSid().equals(DEFAULT_INVALID_SID)) {
 
 			String responseWithCredentials = HttpHelper
-					.executeHttpGet("http://" + fritzBoxHostName + "/login_sid.lua?username="
-					+ username + "&response=" + getResponse(sessionInfo.getChallenge(), password));
+					.executeHttpGet("http://" + fritzBoxHostName + "/login_sid.lua?username=" + username + "&response="
+							+ getResponse(sessionInfo.getChallenge(), password));
 			sessionInfo = convertSessionInfoXML(responseWithCredentials);
 		}
 
