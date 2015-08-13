@@ -13,25 +13,24 @@ import javax.xml.bind.Unmarshaller;
 import com.github.jhaucke.smarthome.fritzboxconnector.helper.HttpHelper;
 import com.github.jhaucke.smarthome.fritzboxconnector.types.SessionInfo;
 
+/**
+ * This class handles the authentication over the FritzBox-Session-ID.
+ */
 public class Authenticator {
 
 	private static final String DEFAULT_INVALID_SID = "0000000000000000";
-
-	public String fritzBoxHostName = "fritz.box";
+	private String fritzBoxHostName;
 
 	/**
-	 * Constructor for {@link Authenticator}. If the FritzBox uses the default
-	 * host name "fritz.box", {@code null} can be passed.
+	 * Constructor for {@link Authenticator}.
 	 * 
 	 * @param fritzBoxHostName
-	 *            custom host name of the FritzBox, if existing
+	 *            host name of the FritzBox
 	 */
 	public Authenticator(String fritzBoxHostName) {
 		super();
 
-		if (fritzBoxHostName != null) {
-			this.fritzBoxHostName = fritzBoxHostName;
-		}
+		this.fritzBoxHostName = fritzBoxHostName;
 	}
 
 	public String getNewSessionId(final String username, final String password) throws IOException, JAXBException {
@@ -80,14 +79,5 @@ public class Authenticator {
 
 		StringReader reader = new StringReader(xmlString);
 		return (SessionInfo) unmarshaller.unmarshal(reader);
-	}
-
-	/**
-	 * Getter for the current host name of the FritzBox.
-	 * 
-	 * @return host name
-	 */
-	public String getFritzBoxHostName() {
-		return fritzBoxHostName;
 	}
 }

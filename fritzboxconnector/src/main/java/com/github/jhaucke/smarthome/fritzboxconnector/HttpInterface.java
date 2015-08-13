@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.github.jhaucke.smarthome.fritzboxconnector.helper.HttpHelper;
 
 /**
- * AVM Home Automation HTTP Interface
+ * Implementation of the AVM Home Automation HTTP Interface.
  */
 public class HttpInterface {
 
