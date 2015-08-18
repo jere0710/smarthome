@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
 
+import com.github.jhaucke.smarthome.datacollectorservice.sqlite.SQLiteJDBC;
 import com.github.jhaucke.smarthome.fritzboxconnector.FritzBoxConnector;
 import com.github.jhaucke.smarthome.fritzboxconnector.HttpInterface;
 
@@ -24,6 +25,6 @@ public class Collector {
 
 		HttpInterface httpInterface = fritzBoxConnector.getHttpInterface();
 
-		System.out.println(httpInterface.getSwitchList());
+		SQLiteJDBC.getInstance().insertPowerData(httpInterface.getSwitchPower(httpInterface.getSwitchList().trim()));
 	}
 }

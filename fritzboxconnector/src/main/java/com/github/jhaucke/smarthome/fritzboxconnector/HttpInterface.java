@@ -116,11 +116,18 @@ public class HttpInterface {
 	 * @return power in mW, "inval" if unknown
 	 * @throws IOException
 	 */
-	public String getSwitchPower(String ain) throws IOException {
+	public int getSwitchPower(String ain) throws IOException {
 
+		int power = 0;
 		String response = HttpHelper.executeHttpGet(getCommandURL("getswitchpower", ain));
 
-		return response;
+		try {
+			power = Integer.valueOf(response.trim());
+		} catch (NumberFormatException e) {
+			// TODO: log exception
+		}
+
+		return power;
 	}
 
 	/**
@@ -191,8 +198,7 @@ public class HttpInterface {
 			ainParameter = ainParameter.concat(ain);
 		}
 
-		return "http://" + fritzBoxHostName + "/webservices/homeautoswitch.lua?switchcmd=" + cmd + "&sid="
-				+ sid
+		return "http://" + fritzBoxHostName + "/webservices/homeautoswitch.lua?switchcmd=" + cmd + "&sid=" + sid
 				+ ainParameter;
 	}
 }
