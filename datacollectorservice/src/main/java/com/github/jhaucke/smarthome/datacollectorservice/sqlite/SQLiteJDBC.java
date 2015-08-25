@@ -4,15 +4,21 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SQLiteJDBC {
 
 	private static SQLiteJDBC instance = null;
 	private Connection c = null;
+	private final Logger logger;
 
 	/**
 	 * A private Constructor prevents any other class from instantiating.
 	 */
 	private SQLiteJDBC() {
+		super();
+		logger = LoggerFactory.getLogger(SQLiteJDBC.class);
 	}
 
 	/**

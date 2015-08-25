@@ -2,6 +2,9 @@ package com.github.jhaucke.smarthome.fritzboxconnector;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.jhaucke.smarthome.fritzboxconnector.helper.HttpHelper;
 
 /**
@@ -11,9 +14,12 @@ public class HttpInterface {
 
 	private final String sid;
 	private final String fritzBoxHostName;
+	private final Logger logger;
 
 	public HttpInterface(String sid, String fritzBoxHostName) {
 		super();
+		logger = LoggerFactory.getLogger(HttpInterface.class);
+
 		this.sid = sid;
 		this.fritzBoxHostName = fritzBoxHostName;
 	}
@@ -124,7 +130,7 @@ public class HttpInterface {
 		try {
 			power = Integer.valueOf(response.trim());
 		} catch (NumberFormatException e) {
-			// TODO: log exception
+			logger.error(e.getMessage());
 		}
 
 		return power;

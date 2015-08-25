@@ -10,6 +10,9 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.jhaucke.smarthome.fritzboxconnector.helper.HttpHelper;
 import com.github.jhaucke.smarthome.fritzboxconnector.types.SessionInfo;
 
@@ -20,6 +23,7 @@ public class Authenticator {
 
 	private static final String DEFAULT_INVALID_SID = "0000000000000000";
 	private String fritzBoxHostName;
+	private final Logger logger;
 
 	/**
 	 * Constructor for {@link Authenticator}.
@@ -29,6 +33,7 @@ public class Authenticator {
 	 */
 	public Authenticator(String fritzBoxHostName) {
 		super();
+		logger = LoggerFactory.getLogger(Authenticator.class);
 
 		this.fritzBoxHostName = fritzBoxHostName;
 	}
@@ -67,7 +72,7 @@ public class Authenticator {
 			}
 			return sb.toString();
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-			// TODO log Exception?
+			logger.error(e.getMessage());
 		}
 		return null;
 	}
