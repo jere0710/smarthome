@@ -16,6 +16,14 @@ public class HttpInterface {
 	private final String fritzBoxHostName;
 	private final Logger logger;
 
+	/**
+	 * Constructor for {@link HttpInterface}.
+	 * 
+	 * @param sid
+	 *            session ID
+	 * @param fritzBoxHostName
+	 *            host name of the FritzBox
+	 */
 	public HttpInterface(String sid, String fritzBoxHostName) {
 		super();
 		logger = LoggerFactory.getLogger(HttpInterface.class);

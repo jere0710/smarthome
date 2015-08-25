@@ -13,7 +13,7 @@ import com.github.jhaucke.smarthome.fritzboxconnector.HttpInterface;
  *
  */
 public class Collector {
-	public static void main(String[] args) throws IOException, JAXBException {
+	public static void main(String[] args) throws IOException, JAXBException, InterruptedException {
 
 		FritzBoxConnector fritzBoxConnector = null;
 
@@ -24,7 +24,12 @@ public class Collector {
 		}
 
 		HttpInterface httpInterface = fritzBoxConnector.getHttpInterface();
+		SQLiteJDBC sqLiteJDBC = new SQLiteJDBC();
+		String ain = httpInterface.getSwitchList().trim();
 
-		SQLiteJDBC.getInstance().insertPowerData(httpInterface.getSwitchPower(httpInterface.getSwitchList().trim()));
+		while (true) {
+			sqLiteJDBC.insertPowerData(httpInterface.getSwitchPower(ain));
+			Thread.sleep(10000);
+		}
 	}
 }
