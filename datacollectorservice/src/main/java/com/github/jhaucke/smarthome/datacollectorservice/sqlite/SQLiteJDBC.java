@@ -8,6 +8,9 @@ import java.sql.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Class to access the database.
+ */
 public class SQLiteJDBC {
 
 	private Connection c = null;
@@ -26,7 +29,7 @@ public class SQLiteJDBC {
 	private void openDatabase() {
 		try {
 			Class.forName("org.sqlite.JDBC");
-			c = DriverManager.getConnection("jdbc:sqlite:test.db");
+			c = DriverManager.getConnection("jdbc:sqlite:../test.db");
 			createTables();
 		} catch (SQLException | ClassNotFoundException e) {
 			logger.error(e.getMessage());
@@ -35,16 +38,14 @@ public class SQLiteJDBC {
 	}
 
 	private void createTables() {
-	    try {
+		try {
 			Statement stmt = c.createStatement();
-	        String createPowerDataSql =
-	        		"CREATE TABLE PowerData ( " +
-	                "ID			INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, " +
-	                "Timestamp	NUMERIC NOT NULL DEFAULT CURRENT_TIMESTAMP UNIQUE, " + 
-	                "Power		INTEGER NOT NULL " + 
-	                ")"; 
-	        stmt.executeUpdate(createPowerDataSql);
-	        stmt.close();
+			String createPowerDataSql = "CREATE TABLE PowerData ( "
+					+ "ID			INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, "
+					+ "Timestamp	NUMERIC NOT NULL DEFAULT CURRENT_TIMESTAMP UNIQUE, "
+					+ "Power		INTEGER NOT NULL " + ")";
+			stmt.executeUpdate(createPowerDataSql);
+			stmt.close();
 		} catch (SQLException e) {
 			logger.error(e.getMessage());
 		}

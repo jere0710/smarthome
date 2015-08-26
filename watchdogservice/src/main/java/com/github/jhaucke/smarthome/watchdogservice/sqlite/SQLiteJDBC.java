@@ -11,6 +11,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Class to access the database.
+ */
 public class SQLiteJDBC {
 
 	private Connection c = null;
@@ -29,7 +32,7 @@ public class SQLiteJDBC {
 	private void openDatabase() {
 		try {
 			Class.forName("org.sqlite.JDBC");
-			c = DriverManager.getConnection("jdbc:sqlite:test.db");
+			c = DriverManager.getConnection("jdbc:sqlite:../test.db");
 		} catch (SQLException | ClassNotFoundException e) {
 			logger.error(e.getMessage());
 		}

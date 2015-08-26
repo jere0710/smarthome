@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.xml.bind.JAXBException;
 
 /**
- * Entry point to use the library.
+ * Entry point to use the AVM Home Automation HTTP Interface.
  */
 public class FritzBoxConnector {
 

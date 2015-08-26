@@ -9,10 +9,11 @@ import com.github.jhaucke.smarthome.fritzboxconnector.FritzBoxConnector;
 import com.github.jhaucke.smarthome.fritzboxconnector.HttpInterface;
 
 /**
- * Hello world!
- *
+ * This class is the entry point to start the data-collector-service.<br>
+ * It continuously collects readings from the actuators.
  */
 public class Collector {
+
 	public static void main(String[] args) throws IOException, JAXBException, InterruptedException {
 
 		FritzBoxConnector fritzBoxConnector = null;
@@ -24,11 +25,11 @@ public class Collector {
 		}
 
 		HttpInterface httpInterface = fritzBoxConnector.getHttpInterface();
-		SQLiteJDBC sqLiteJDBC = new SQLiteJDBC();
+		SQLiteJDBC db = new SQLiteJDBC();
 		String ain = httpInterface.getSwitchList().trim();
 
 		while (true) {
-			sqLiteJDBC.insertPowerData(httpInterface.getSwitchPower(ain));
+			db.insertPowerData(httpInterface.getSwitchPower(ain));
 			Thread.sleep(10000);
 		}
 	}
