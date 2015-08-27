@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
 
-import com.github.jhaucke.smarthome.datacollectorservice.sqlite.SQLiteJDBC;
+import com.github.jhaucke.smarthome.database.SQLiteJDBC;
 import com.github.jhaucke.smarthome.fritzboxconnector.FritzBoxConnector;
 import com.github.jhaucke.smarthome.fritzboxconnector.HttpInterface;
 

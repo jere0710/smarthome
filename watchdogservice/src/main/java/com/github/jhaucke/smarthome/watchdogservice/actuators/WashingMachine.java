@@ -5,7 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.jhaucke.smarthome.watchdogservice.sqlite.SQLiteJDBC;
+import com.github.jhaucke.smarthome.database.SQLiteJDBC;
 
 /**
  * {@link Runnable} to monitor the power consumption of the washing machine to
