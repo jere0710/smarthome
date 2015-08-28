@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.jhaucke.smarthome.database.SQLiteJDBC;
+import com.github.jhaucke.smarthome.watchdogservice.mqtt.MqttPublisher;
 
 /**
  * {@link Runnable} to monitor the power consumption of the washing machine to
@@ -27,6 +28,7 @@ public class WashingMachine implements Runnable {
 	public void run() {
 
 		SQLiteJDBC db = new SQLiteJDBC();
+		MqttPublisher publisher = new MqttPublisher();
 
 		while (true) {
 			boolean isWashingMachineActive = false;
@@ -40,6 +42,7 @@ public class WashingMachine implements Runnable {
 
 			if (isWashingMachineActive) {
 				logger.info("washing machine is active");
+				publisher.sendMessage("washing machine", "washing machine is active");
 			}
 
 			try {
