@@ -8,6 +8,9 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class allows to publish a mqtt message to a mqtt broker.
+ */
 public class MqttPublisher {
 
 	private final Logger logger;
@@ -20,12 +23,20 @@ public class MqttPublisher {
 		logger = LoggerFactory.getLogger(MqttPublisher.class);
 	}
 
+	/**
+	 * Publish a mqtt message to a mqtt broker.
+	 * 
+	 * @param topic
+	 *            The topic of the message
+	 * @param content
+	 *            The message
+	 */
 	public void sendMessage(String topic, String content) {
 
 		final int qos = 2;
 		final String broker = "tcp://localhost:1883";
 		final String clientId = "WatchDogService";
-		final MemoryPersistence persistence = new MemoryPersistence();
+		MemoryPersistence persistence = new MemoryPersistence();
 
 		try {
 			MqttClient sampleClient = new MqttClient(broker, clientId, persistence);
@@ -41,7 +52,6 @@ public class MqttPublisher {
 			System.out.println("Message published");
 			sampleClient.disconnect();
 			System.out.println("Disconnected");
-			System.exit(0);
 		} catch (MqttException me) {
 			System.out.println("reason " + me.getReasonCode());
 			System.out.println("msg " + me.getMessage());

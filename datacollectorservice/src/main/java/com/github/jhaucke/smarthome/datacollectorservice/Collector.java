@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.xml.bind.JAXBException;
 
 import com.github.jhaucke.smarthome.database.SQLiteJDBC;
+import com.github.jhaucke.smarthome.database.constants.Actuator;
 import com.github.jhaucke.smarthome.fritzboxconnector.FritzBoxConnector;
 import com.github.jhaucke.smarthome.fritzboxconnector.HttpInterface;
 
@@ -26,10 +27,10 @@ public class Collector {
 
 		HttpInterface httpInterface = fritzBoxConnector.getHttpInterface();
 		SQLiteJDBC db = new SQLiteJDBC();
-		String ain = httpInterface.getSwitchList().trim();
+		String ainWashingMachine = Actuator.WASHING_MACHINE.getAIN();
 
 		while (true) {
-			db.insertPowerData(httpInterface.getSwitchPower(ain));
+			db.insertPowerData(httpInterface.getSwitchPower(ainWashingMachine));
 			Thread.sleep(10000);
 		}
 	}

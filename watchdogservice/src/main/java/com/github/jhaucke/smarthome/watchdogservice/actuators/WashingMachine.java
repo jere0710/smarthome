@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.jhaucke.smarthome.database.SQLiteJDBC;
+import com.github.jhaucke.smarthome.database.constants.Actuator;
+import com.github.jhaucke.smarthome.database.constants.ActuatorState;
 import com.github.jhaucke.smarthome.watchdogservice.mqtt.MqttPublisher;
 
 /**
@@ -40,9 +42,16 @@ public class WashingMachine implements Runnable {
 				}
 			}
 
-			if (isWashingMachineActive) {
-				logger.info("washing machine is active");
-				publisher.sendMessage("washing machine", "washing machine is active");
+			Integer currentState = db.selectStateOfActuator(Actuator.WASHING_MACHINE.getValue());
+			if (currentState != null) {
+				if (currentState.intValue() == ActuatorState.OFF.getValue() && isWashingMachineActive) {
+					publisher.sendMessage("smarthome/devices/washingmachine/state", ActuatorState.ON.toString());
+					db.updateStateOfActuator(Actuator.WASHING_MACHINE.getValue(), ActuatorState.ON.getValue());
+				}
+				if (currentState.intValue() == ActuatorState.ON.getValue() && !isWashingMachineActive) {
+					publisher.sendMessage("smarthome/devices/washingmachine/state", ActuatorState.FINISHED.toString());
+					db.updateStateOfActuator(Actuator.WASHING_MACHINE.getValue(), ActuatorState.FINISHED.getValue());
+				}
 			}
 
 			try {

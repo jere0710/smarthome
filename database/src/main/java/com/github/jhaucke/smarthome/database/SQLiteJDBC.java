@@ -36,19 +36,19 @@ public class SQLiteJDBC {
 		} catch (SQLException | ClassNotFoundException e) {
 			logger.error(e.getMessage());
 		}
-		logger.info("Opened database successfully");
+		logger.info("opened database successfully");
 	}
 
 	public void insertPowerData(int power) {
 		try {
 			Statement stmt = c.createStatement();
-			String sql = "INSERT INTO POWERDATA (POWER) VALUES (" + power + ");";
+			String sql = "INSERT INTO PowerData (Power) VALUES (" + power + ");";
 			stmt.executeUpdate(sql);
 			stmt.close();
 		} catch (SQLException e) {
 			logger.error(e.getMessage());
 		}
-		logger.info("Records created successfully");
+		logger.info("power record created successfully");
 	}
 
 	public List<Integer> selectTheLast5Minutes() {
@@ -65,7 +65,39 @@ public class SQLiteJDBC {
 		} catch (SQLException e) {
 			logger.error(e.getMessage());
 		}
-		logger.info("Operation done successfully");
+		logger.info("last 5 minutes selected");
 		return last5Minutes;
+	}
+
+	public Integer selectStateOfActuator(int actuatorId) {
+
+		Integer actuatorStateId = null;
+		try {
+			Statement stmt = c.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT ID_ActuatorState FROM Actuator WHERE ID = " + actuatorId + ";");
+			while (rs.next()) {
+				actuatorStateId = rs.getInt("ID_ActuatorState");
+			}
+			rs.close();
+			stmt.close();
+		} catch (SQLException e) {
+			logger.error(e.getMessage());
+		}
+		logger.info("current state of actuator selected");
+		return actuatorStateId;
+	}
+
+	public void updateStateOfActuator(int actuatorId, int actuatorStateId) {
+		try {
+			Statement stmt = c.createStatement();
+			String sql = "UPDATE Actuator SET ID_ActuatorState = " + actuatorStateId + " WHERE ID = " + actuatorId
+					+ ";";
+			stmt.executeUpdate(sql);
+			// AutoCommit
+			stmt.close();
+		} catch (SQLException e) {
+			logger.error(e.getMessage());
+		}
+		logger.info("power records created successfully");
 	}
 }
