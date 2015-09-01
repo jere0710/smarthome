@@ -98,6 +98,6 @@ public class SQLiteJDBC {
 		} catch (SQLException e) {
 			logger.error(e.getMessage());
 		}
-		logger.info("power records created successfully");
+		logger.info("state of actuator successfully updated");
 	}
 }

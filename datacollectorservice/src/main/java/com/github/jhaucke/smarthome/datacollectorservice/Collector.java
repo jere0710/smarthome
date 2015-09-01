@@ -30,7 +30,10 @@ public class Collector {
 		String ainWashingMachine = Actuator.WASHING_MACHINE.getAIN();
 
 		while (true) {
-			db.insertPowerData(httpInterface.getSwitchPower(ainWashingMachine));
+			String switchState = httpInterface.getSwitchState(ainWashingMachine);
+			if (switchState.equals("1")) {
+				db.insertPowerData(httpInterface.getSwitchPower(ainWashingMachine));
+			}
 			Thread.sleep(10000);
 		}
 	}

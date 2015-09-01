@@ -2,7 +2,7 @@ package com.github.jhaucke.smarthome.database.constants;
 
 public enum ActuatorState {
 
-	OFF(1), ON(2), FINISHED(3);
+	OFF(1), ON(2), ACTIVE(3), FINISHED(4);
 
 	private int value;
 
