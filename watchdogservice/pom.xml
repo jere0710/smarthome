@@ -38,8 +38,6 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<addClasspath>true</addClasspath>
-							<classpathPrefix>lib/</classpathPrefix>
 							<mainClass>com.github.jhaucke.smarthome.watchdogservice.WatchDog</mainClass>
 						</manifest>
 					</archive>
