@@ -17,7 +17,7 @@ public enum Actuator {
 	public String getAIN() {
 		switch (value) {
 		case 1:
-			return "87610196692";
+			return "087610196692";
 		default:
 			return "";
 		}

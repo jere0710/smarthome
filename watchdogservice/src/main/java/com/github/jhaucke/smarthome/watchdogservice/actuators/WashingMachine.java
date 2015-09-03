@@ -64,11 +64,13 @@ public class WashingMachine implements Runnable {
 					publisher.sendMessage("smarthome/devices/washingmachine/state", ActuatorState.ON.toString());
 					db.updateStateOfActuator(Actuator.WASHING_MACHINE.getValue(), ActuatorState.ON.getValue());
 				}
-				if (currentActuatorState.intValue() != ActuatorState.ACTIVE.getValue() && isWashingMachineActive) {
+				if (switchState.equals("1") && currentActuatorState.intValue() != ActuatorState.ACTIVE.getValue()
+						&& isWashingMachineActive) {
 					publisher.sendMessage("smarthome/devices/washingmachine/state", ActuatorState.ACTIVE.toString());
 					db.updateStateOfActuator(Actuator.WASHING_MACHINE.getValue(), ActuatorState.ACTIVE.getValue());
 				}
-				if (currentActuatorState.intValue() == ActuatorState.ACTIVE.getValue() && !isWashingMachineActive) {
+				if (switchState.equals("1") && currentActuatorState.intValue() == ActuatorState.ACTIVE.getValue()
+						&& !isWashingMachineActive) {
 					publisher.sendMessage("smarthome/devices/washingmachine/state", ActuatorState.FINISHED.toString());
 					db.updateStateOfActuator(Actuator.WASHING_MACHINE.getValue(), ActuatorState.FINISHED.getValue());
 				}
