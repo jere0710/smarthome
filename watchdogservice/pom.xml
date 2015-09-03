@@ -44,6 +44,7 @@
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
+					<outputDirectory>../uber-jars</outputDirectory>
 				</configuration>
 				<executions>
 					<execution>
