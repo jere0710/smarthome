@@ -4,8 +4,11 @@ import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
 
-import com.github.jhaucke.smarthome.database.SQLiteJDBC;
-import com.github.jhaucke.smarthome.database.constants.Actuator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.github.jhaucke.smarthome.basic.database.SQLiteJDBC;
+import com.github.jhaucke.smarthome.basic.database.constants.Actuator;
 import com.github.jhaucke.smarthome.fritzboxconnector.FritzBoxConnector;
 import com.github.jhaucke.smarthome.fritzboxconnector.HttpInterface;
 
@@ -17,6 +20,7 @@ public class Collector {
 
 	public static void main(String[] args) throws IOException, JAXBException, InterruptedException {
 
+		Logger logger = LoggerFactory.getLogger(Collector.class);
 		FritzBoxConnector fritzBoxConnector = null;
 
 		if (args.length == 2) {
@@ -32,7 +36,12 @@ public class Collector {
 		while (true) {
 			String switchState = httpInterface.getSwitchState(ainWashingMachine);
 			if (switchState.equals("1")) {
-				db.insertPowerData(httpInterface.getSwitchPower(ainWashingMachine));
+				String switchPower = httpInterface.getSwitchPower(ainWashingMachine);
+				try {
+					db.insertPowerData(Integer.valueOf(switchPower));
+				} catch (NumberFormatException nfe) {
+					logger.error(nfe.getMessage());
+				}
 			}
 			Thread.sleep(10000);
 		}

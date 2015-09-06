@@ -56,7 +56,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.github.jhaucke.smarthome</groupId>
-			<artifactId>database</artifactId>
+			<artifactId>basic</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>

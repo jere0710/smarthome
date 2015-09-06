@@ -1,4 +1,4 @@
-package com.github.jhaucke.smarthome.database.constants;
+package com.github.jhaucke.smarthome.basic.database.constants;
 
 public enum Actuator {
 

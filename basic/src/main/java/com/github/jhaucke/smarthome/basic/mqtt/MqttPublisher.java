@@ -1,4 +1,4 @@
-package com.github.jhaucke.smarthome.watchdogservice.mqtt;
+package com.github.jhaucke.smarthome.basic.mqtt;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;

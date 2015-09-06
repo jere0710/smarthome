@@ -1,4 +1,4 @@
-package com.github.jhaucke.smarthome.database;
+package com.github.jhaucke.smarthome.basic;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

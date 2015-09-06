@@ -2,9 +2,6 @@ package com.github.jhaucke.smarthome.fritzboxconnector;
 
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.jhaucke.smarthome.fritzboxconnector.helper.HttpHelper;
 
 /**
@@ -14,7 +11,6 @@ public class HttpInterface {
 
 	private final String sid;
 	private final String fritzBoxHostName;
-	private final Logger logger;
 
 	/**
 	 * Constructor for {@link HttpInterface}.
@@ -26,7 +22,6 @@ public class HttpInterface {
 	 */
 	public HttpInterface(String sid, String fritzBoxHostName) {
 		super();
-		logger = LoggerFactory.getLogger(HttpInterface.class);
 
 		this.sid = sid;
 		this.fritzBoxHostName = fritzBoxHostName;
@@ -40,9 +35,9 @@ public class HttpInterface {
 	 */
 	public String getSwitchList() throws IOException {
 
-		String response = HttpHelper.executeHttpGet(getCommandURL("getswitchlist", null)).trim();
+		String response = HttpHelper.executeHttpGet(getCommandURL("getswitchlist", null));
 
-		return response;
+		return response.trim();
 	}
 
 	/**
@@ -55,9 +50,9 @@ public class HttpInterface {
 	 */
 	public String setSwitchOn(String ain) throws IOException {
 
-		String response = HttpHelper.executeHttpGet(getCommandURL("setswitchon", ain)).trim();
+		String response = HttpHelper.executeHttpGet(getCommandURL("setswitchon", ain));
 
-		return response;
+		return response.trim();
 	}
 
 	/**
@@ -70,9 +65,9 @@ public class HttpInterface {
 	 */
 	public String setSwitchOff(String ain) throws IOException {
 
-		String response = HttpHelper.executeHttpGet(getCommandURL("setswitchoff", ain)).trim();
+		String response = HttpHelper.executeHttpGet(getCommandURL("setswitchoff", ain));
 
-		return response;
+		return response.trim();
 	}
 
 	/**
@@ -85,9 +80,9 @@ public class HttpInterface {
 	 */
 	public String setSwitchToggle(String ain) throws IOException {
 
-		String response = HttpHelper.executeHttpGet(getCommandURL("setswitchtoggle", ain)).trim();
+		String response = HttpHelper.executeHttpGet(getCommandURL("setswitchtoggle", ain));
 
-		return response;
+		return response.trim();
 	}
 
 	/**
@@ -100,9 +95,9 @@ public class HttpInterface {
 	 */
 	public String getSwitchState(String ain) throws IOException {
 
-		String response = HttpHelper.executeHttpGet(getCommandURL("getswitchstate", ain)).trim();
+		String response = HttpHelper.executeHttpGet(getCommandURL("getswitchstate", ain));
 
-		return response;
+		return response.trim();
 	}
 
 	/**
@@ -117,9 +112,9 @@ public class HttpInterface {
 	 */
 	public String getSwitchPresent(String ain) throws IOException {
 
-		String response = HttpHelper.executeHttpGet(getCommandURL("getswitchpresent", ain)).trim();
+		String response = HttpHelper.executeHttpGet(getCommandURL("getswitchpresent", ain));
 
-		return response;
+		return response.trim();
 	}
 
 	/**
@@ -130,18 +125,11 @@ public class HttpInterface {
 	 * @return power in mW, "inval" if unknown
 	 * @throws IOException
 	 */
-	public int getSwitchPower(String ain) throws IOException {
+	public String getSwitchPower(String ain) throws IOException {
 
-		int power = 0;
-		String response = HttpHelper.executeHttpGet(getCommandURL("getswitchpower", ain)).trim();
+		String response = HttpHelper.executeHttpGet(getCommandURL("getswitchpower", ain));
 
-		try {
-			power = Integer.valueOf(response.trim());
-		} catch (NumberFormatException e) {
-			logger.error(e.getMessage());
-		}
-
-		return power;
+		return response.trim();
 	}
 
 	/**
@@ -155,9 +143,9 @@ public class HttpInterface {
 	 */
 	public String getSwitchEnergy(String ain) throws IOException {
 
-		String response = HttpHelper.executeHttpGet(getCommandURL("getswitchenergy", ain)).trim();
+		String response = HttpHelper.executeHttpGet(getCommandURL("getswitchenergy", ain));
 
-		return response;
+		return response.trim();
 	}
 
 	/**
@@ -170,9 +158,9 @@ public class HttpInterface {
 	 */
 	public String getDeviceName(String ain) throws IOException {
 
-		String response = HttpHelper.executeHttpGet(getCommandURL("getswitchname", ain)).trim();
+		String response = HttpHelper.executeHttpGet(getCommandURL("getswitchname", ain));
 
-		return response;
+		return response.trim();
 	}
 
 	/**
@@ -183,9 +171,9 @@ public class HttpInterface {
 	 */
 	public String getDeviceListInfos() throws IOException {
 
-		String response = HttpHelper.executeHttpGet(getCommandURL("getdevicelistinfos", null)).trim();
+		String response = HttpHelper.executeHttpGet(getCommandURL("getdevicelistinfos", null));
 
-		return response;
+		return response.trim();
 	}
 
 	/**
@@ -197,9 +185,9 @@ public class HttpInterface {
 	 */
 	public String getTemperature(String ain) throws IOException {
 
-		String response = HttpHelper.executeHttpGet(getCommandURL("gettemperature", null)).trim();
+		String response = HttpHelper.executeHttpGet(getCommandURL("gettemperature", null));
 
-		return response;
+		return response.trim();
 	}
 
 	private String getCommandURL(String cmd, String ain) {

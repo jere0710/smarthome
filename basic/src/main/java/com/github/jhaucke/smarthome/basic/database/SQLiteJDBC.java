@@ -1,4 +1,4 @@
-package com.github.jhaucke.smarthome.database;
+package com.github.jhaucke.smarthome.basic.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

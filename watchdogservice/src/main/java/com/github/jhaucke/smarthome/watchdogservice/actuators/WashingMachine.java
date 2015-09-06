@@ -6,11 +6,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.jhaucke.smarthome.database.SQLiteJDBC;
-import com.github.jhaucke.smarthome.database.constants.Actuator;
-import com.github.jhaucke.smarthome.database.constants.ActuatorState;
+import com.github.jhaucke.smarthome.basic.database.SQLiteJDBC;
+import com.github.jhaucke.smarthome.basic.database.constants.Actuator;
+import com.github.jhaucke.smarthome.basic.database.constants.ActuatorState;
+import com.github.jhaucke.smarthome.basic.mqtt.MqttPublisher;
 import com.github.jhaucke.smarthome.fritzboxconnector.HttpInterface;
-import com.github.jhaucke.smarthome.watchdogservice.mqtt.MqttPublisher;
 
 /**
  * {@link Runnable} to monitor the power consumption of the washing machine to
@@ -37,6 +37,8 @@ public class WashingMachine implements Runnable {
 
 		SQLiteJDBC db = new SQLiteJDBC();
 		MqttPublisher publisher = new MqttPublisher();
+
+		publisher.sendMessage("smarthome/server/info/watchdog/washingmachine", getClass().getName() + " started");
 
 		while (true) {
 			boolean isWashingMachineActive = false;
