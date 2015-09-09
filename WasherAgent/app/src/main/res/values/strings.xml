@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Washer Agent</string>
+    <string name="service_name">Mqtt Service</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="btn_start_service">start service</string>
+    <string name="btn_stop_service">stop service</string>
+</resources>
