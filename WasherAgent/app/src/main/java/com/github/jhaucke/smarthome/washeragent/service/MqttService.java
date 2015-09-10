@@ -2,7 +2,10 @@ package com.github.jhaucke.smarthome.washeragent.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.widget.Toast;
 
@@ -11,9 +14,18 @@ import android.widget.Toast;
  */
 public class MqttService extends Service {
 
+    private Handler toastHandler;
+
+    @Override
+    public void onCreate() {
+        //android.os.Debug.waitForDebugger();
+        toastHandler = new Handler(Looper.getMainLooper());
+        toastHandler.post(new ToastRunnable("MqttService started"));
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Toast.makeText(this, "onStartCommand", Toast.LENGTH_SHORT).show();
+        MqttAndroidClient.startInstance(getApplicationContext());
         return Service.START_STICKY;
     }
 
@@ -24,12 +36,20 @@ public class MqttService extends Service {
     }
 
     @Override
-    public void onCreate() {
-        Toast.makeText(this, "MqttService started", Toast.LENGTH_SHORT).show();
+    public void onDestroy() {
+        toastHandler.post(new ToastRunnable("MqttService stopped"));
     }
 
-    @Override
-    public void onDestroy() {
-        Toast.makeText(this, "MqttService stopped", Toast.LENGTH_SHORT).show();
+    private class ToastRunnable implements Runnable {
+        String message;
+
+        public ToastRunnable(String message) {
+            this.message = message;
+        }
+
+        @Override
+        public void run() {
+            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+        }
     }
 }
