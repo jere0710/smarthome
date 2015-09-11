@@ -2,10 +2,10 @@ package com.github.jhaucke.smarthome.washeragent.service;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.widget.Toast;
 
@@ -15,12 +15,18 @@ import android.widget.Toast;
 public class MqttService extends Service {
 
     private Handler toastHandler;
+    private PowerManager.WakeLock wakeLock;
 
     @Override
     public void onCreate() {
         //android.os.Debug.waitForDebugger();
         toastHandler = new Handler(Looper.getMainLooper());
         toastHandler.post(new ToastRunnable("MqttService started"));
+
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "MqttServiceWakelock");
+        wakeLock.acquire();
     }
 
     @Override
@@ -37,6 +43,7 @@ public class MqttService extends Service {
 
     @Override
     public void onDestroy() {
+        wakeLock.release();
         toastHandler.post(new ToastRunnable("MqttService stopped"));
     }
 
