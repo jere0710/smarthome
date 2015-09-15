@@ -23,7 +23,6 @@
         </activity>
         <service
             android:name=".service.MqttService"
-            android:process=":mqttservice_process"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/service_name"
             >

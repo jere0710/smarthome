@@ -14,6 +14,7 @@ import android.widget.Toast;
  */
 public class MqttService extends Service {
 
+    private MqttAndroidClient instance;
     private Handler toastHandler;
     private PowerManager.WakeLock wakeLock;
 
@@ -31,7 +32,7 @@ public class MqttService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        MqttAndroidClient.startInstance(getApplicationContext());
+        instance = MqttAndroidClient.startInstance(getApplicationContext());
         return Service.START_STICKY;
     }
 
@@ -43,6 +44,7 @@ public class MqttService extends Service {
 
     @Override
     public void onDestroy() {
+        instance.closeConnection();
         wakeLock.release();
         toastHandler.post(new ToastRunnable("MqttService stopped"));
     }

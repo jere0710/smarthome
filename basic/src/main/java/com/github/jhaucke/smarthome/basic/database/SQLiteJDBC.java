@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +33,17 @@ public class SQLiteJDBC {
 	private void openDatabase() {
 		try {
 			Class.forName("org.sqlite.JDBC");
-			c = DriverManager.getConnection("jdbc:sqlite:../smarthome.db");
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error(e.getMessage());
+			Properties config = new Properties();
+			config.put("journal_mode", "WAL");
+			c = DriverManager.getConnection("jdbc:sqlite:../smarthome.db", config);
+		} catch (ClassNotFoundException e) {
+			logger.error("message: " + e.getMessage() + " cause: " + e.getCause());
+			e.printStackTrace();
+		} catch (SQLException e) {
+			logger.error("state: " + e.getSQLState() + " code: " + e.getErrorCode() + " message: " + e.getMessage()
+					+ " cause: " + e.getCause());
 		}
+
 		logger.info("opened database successfully");
 	}
 
@@ -46,7 +54,8 @@ public class SQLiteJDBC {
 			stmt.executeUpdate(sql);
 			stmt.close();
 		} catch (SQLException e) {
-			logger.error(e.getMessage());
+			logger.error("state: " + e.getSQLState() + " code: " + e.getErrorCode() + " message: " + e.getMessage()
+					+ " cause: " + e.getCause());
 		}
 		logger.info("power record created successfully");
 	}
@@ -63,7 +72,8 @@ public class SQLiteJDBC {
 			rs.close();
 			stmt.close();
 		} catch (SQLException e) {
-			logger.error(e.getMessage());
+			logger.error("state: " + e.getSQLState() + " code: " + e.getErrorCode() + " message: " + e.getMessage()
+					+ " cause: " + e.getCause());
 		}
 		logger.info("last 5 minutes selected");
 		return last5Minutes;
@@ -81,7 +91,8 @@ public class SQLiteJDBC {
 			rs.close();
 			stmt.close();
 		} catch (SQLException e) {
-			logger.error(e.getMessage());
+			logger.error("state: " + e.getSQLState() + " code: " + e.getErrorCode() + " message: " + e.getMessage()
+					+ " cause: " + e.getCause());
 		}
 		logger.info("current state of actuator selected");
 		return actuatorStateId;
@@ -96,7 +107,8 @@ public class SQLiteJDBC {
 			// AutoCommit
 			stmt.close();
 		} catch (SQLException e) {
-			logger.error(e.getMessage());
+			logger.error("state: " + e.getSQLState() + " code: " + e.getErrorCode() + " message: " + e.getMessage()
+					+ " cause: " + e.getCause());
 		}
 		logger.info("state of actuator successfully updated");
 	}

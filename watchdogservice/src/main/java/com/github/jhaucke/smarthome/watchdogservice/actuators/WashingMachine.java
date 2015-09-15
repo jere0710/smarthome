@@ -79,7 +79,7 @@ public class WashingMachine implements Runnable {
 			}
 
 			try {
-				Thread.sleep(20000);
+				Thread.sleep(15000);
 			} catch (InterruptedException ie) {
 				logger.error(ie.getMessage());
 			}
