@@ -5,6 +5,8 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 
+    <string name="tv_broker_host">Borker-Host:</string>
+    
     <string name="btn_start_service">start service</string>
     <string name="btn_stop_service">stop service</string>
 </resources>

@@ -9,9 +9,6 @@ import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.widget.Toast;
 
-/**
- * Created by jeremias.haucke on 09.09.2015.
- */
 public class MqttService extends Service {
 
     private MqttAndroidClient instance;
@@ -23,16 +20,11 @@ public class MqttService extends Service {
         //android.os.Debug.waitForDebugger();
         toastHandler = new Handler(Looper.getMainLooper());
         toastHandler.post(new ToastRunnable("MqttService started"));
-
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                "MqttServiceWakelock");
-        wakeLock.acquire();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        instance = MqttAndroidClient.startInstance(getApplicationContext());
+        instance = MqttAndroidClient.startInstance(getApplicationContext(), intent.getStringExtra("BrokerHost"));
         return Service.START_STICKY;
     }
 
@@ -45,7 +37,6 @@ public class MqttService extends Service {
     @Override
     public void onDestroy() {
         instance.closeConnection();
-        wakeLock.release();
         toastHandler.post(new ToastRunnable("MqttService stopped"));
     }
 
