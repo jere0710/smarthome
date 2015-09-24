@@ -2,8 +2,6 @@ package com.github.jhaucke.smarthome.fritzboxconnector;
 
 import java.io.IOException;
 
-import javax.xml.bind.JAXBException;
-
 /**
  * Entry point to use the AVM Home Automation HTTP Interface.
  */
@@ -21,10 +19,9 @@ public class FritzBoxConnector {
 	 *            If the FritzBox use the default host name "fritz.box",
 	 *            {@code null} can be passed.
 	 * @throws IOException
-	 * @throws JAXBException
 	 */
 	public FritzBoxConnector(final String username, final String password, final String fritzBoxHostName)
-			throws IOException, JAXBException {
+			throws IOException {
 		super();
 
 		if (fritzBoxHostName != null) {

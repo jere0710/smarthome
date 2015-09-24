@@ -2,8 +2,6 @@ package com.github.jhaucke.smarthome.datacollectorservice;
 
 import java.io.IOException;
 
-import javax.xml.bind.JAXBException;
-
 import com.github.jhaucke.smarthome.datacollectorservice.actuators.WashingMachine;
 import com.github.jhaucke.smarthome.fritzboxconnector.FritzBoxConnector;
 import com.github.jhaucke.smarthome.fritzboxconnector.HttpInterface;
@@ -15,7 +13,7 @@ import com.github.jhaucke.smarthome.fritzboxconnector.HttpInterface;
  */
 public class Collector {
 
-	public static void main(String[] args) throws IOException, JAXBException {
+	public static void main(String[] args) throws IOException {
 
 		FritzBoxConnector fritzBoxConnector = null;
 

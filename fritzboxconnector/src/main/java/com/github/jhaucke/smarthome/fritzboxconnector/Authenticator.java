@@ -38,17 +38,17 @@ public class Authenticator {
 		this.fritzBoxHostName = fritzBoxHostName;
 	}
 
-	public String getNewSessionId(final String username, final String password) throws IOException, JAXBException {
+	public String getNewSessionId(final String username, final String password) throws IOException {
 
 		SessionInfo sessionInfo = null;
 
-		String responseWithoutCredentials = HttpHelper.executeHttpGet("http://" + fritzBoxHostName + "/login_sid.lua");
+		String responseWithoutCredentials = HttpHelper.executeHttpGet("https://" + fritzBoxHostName + "/login_sid.lua");
 		sessionInfo = convertSessionInfoXML(responseWithoutCredentials);
 
 		if (sessionInfo.getSid().equals(DEFAULT_INVALID_SID)) {
 
 			String responseWithCredentials = HttpHelper
-					.executeHttpGet("http://" + fritzBoxHostName + "/login_sid.lua?username=" + username + "&response="
+					.executeHttpGet("https://" + fritzBoxHostName + "/login_sid.lua?username=" + username + "&response="
 							+ getResponse(sessionInfo.getChallenge(), password));
 			sessionInfo = convertSessionInfoXML(responseWithCredentials);
 		}
@@ -77,12 +77,20 @@ public class Authenticator {
 		return null;
 	}
 
-	private SessionInfo convertSessionInfoXML(String xmlString) throws JAXBException {
+	private SessionInfo convertSessionInfoXML(String xmlString) {
 
-		JAXBContext jaxbContext = JAXBContext.newInstance(SessionInfo.class);
-		Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+		SessionInfo unmarshaledString = null;
 
-		StringReader reader = new StringReader(xmlString);
-		return (SessionInfo) unmarshaller.unmarshal(reader);
+		try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(SessionInfo.class);
+			Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+			StringReader reader = new StringReader(xmlString);
+			unmarshaledString = (SessionInfo) unmarshaller.unmarshal(reader);
+		} catch (JAXBException e) {
+			String newLine = System.getProperty("line.separator");
+			logger.error("Message: " + e.getMessage() + newLine + "Cause: " + e.getCause() + newLine + "StackTrace: "
+					+ e.getStackTrace());
+		}
+		return unmarshaledString;
 	}
 }
