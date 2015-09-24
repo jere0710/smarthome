@@ -1,30 +1,41 @@
 package com.github.jhaucke.smarthome.washeragent.service;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.widget.Toast;
 
 public class MqttService extends Service {
 
-    private MqttAndroidClient instance;
+    private static MyMqttClient client = null;
+    ConnectivityChangReceiver connectivityChangReceiver;
+    private Context serviceContext;
     private Handler toastHandler;
-    private PowerManager.WakeLock wakeLock;
+
+    public static MyMqttClient getClient() {
+        return client;
+    }
 
     @Override
     public void onCreate() {
         //android.os.Debug.waitForDebugger();
+        serviceContext = getApplicationContext();
+        connectivityChangReceiver = new ConnectivityChangReceiver();
+        serviceContext.registerReceiver(connectivityChangReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
         toastHandler = new Handler(Looper.getMainLooper());
         toastHandler.post(new ToastRunnable("MqttService started"));
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        instance = MqttAndroidClient.startInstance(getApplicationContext(), intent.getStringExtra("BrokerHost"));
+        client = new MyMqttClient(serviceContext, intent.getStringExtra("BrokerHost"));
         return Service.START_STICKY;
     }
 
@@ -36,7 +47,8 @@ public class MqttService extends Service {
 
     @Override
     public void onDestroy() {
-        instance.closeConnection();
+        client.closeConnection();
+        serviceContext.unregisterReceiver(connectivityChangReceiver);
         toastHandler.post(new ToastRunnable("MqttService stopped"));
     }
 

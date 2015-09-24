@@ -101,15 +101,12 @@ public class KeepAlivePingSender implements MqttPingSender {
 
     private void createNotification(String message) {
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        long[] pattern = {500, 500, 500, 500, 500, 500, 500, 500, 500};
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(serviceContext)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("My little smarthome")
                         .setContentText(message)
-                        .setLights(Color.MAGENTA, 1000, 2000)
-                        .setVibrate(pattern)
-                        .setSound(alarmSound);
+                        .setLights(Color.MAGENTA, 1000, 2000);
 
         NotificationManager mNotifyMgr =
                 (NotificationManager) serviceContext.getSystemService(serviceContext.NOTIFICATION_SERVICE);

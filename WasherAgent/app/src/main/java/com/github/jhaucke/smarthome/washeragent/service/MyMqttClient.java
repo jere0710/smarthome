@@ -4,12 +4,11 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.Color;
 import android.media.RingtoneManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
-import android.widget.Toast;
 
 import com.github.jhaucke.smarthome.washeragent.R;
 
@@ -21,39 +20,25 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import java.io.EOFException;
 import java.util.UUID;
 
-public class MqttAndroidClient {
+public class MyMqttClient {
 
-    private static MqttAndroidClient instance = null;
     private static String brokerHost;
     MqttAsyncClient c;
     MqttConnectOptions conOptions;
     MqttCallbackImpl callback;
     private Context serviceContext = null;
-    private Handler toastHandler;
     private int retryCount;
     private KeepAlivePingSender pingSender;
 
-    private MqttAndroidClient(Context serviceContext, String brokerHost) {
+    public MyMqttClient(Context serviceContext, String brokerHost) {
         super();
 
         this.serviceContext = serviceContext;
         this.brokerHost = brokerHost;
-        toastHandler = new Handler(Looper.getMainLooper());
         startClient();
-    }
-
-    public static MqttAndroidClient startInstance(Context serviceContext, String newBrokerHost) {
-        if (instance == null || !brokerHost.equals(newBrokerHost)) {
-            if (instance != null) {
-                instance.closeConnection();
-            }
-            instance = new MqttAndroidClient(serviceContext, newBrokerHost);
-        } else {
-            instance.connect();
-        }
-        return instance;
     }
 
     private void startClient() {
@@ -73,8 +58,8 @@ public class MqttAndroidClient {
         }
     }
 
-    private void connect() {
-        boolean tryConnecting = !c.isConnected();
+    public void connect() {
+        boolean tryConnecting = !c.isConnected() && isConnectedToInternet();
         retryCount = 0;
         while (tryConnecting) {
             try {
@@ -91,10 +76,19 @@ public class MqttAndroidClient {
         }
     }
 
+    private boolean isConnectedToInternet() {
+        ConnectivityManager cm =
+                (ConnectivityManager) serviceContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+    }
+
     private boolean pause(int retryCount) {
         try {
             if (retryCount < 5) {
-                Thread.sleep(1000); // 1 s
+                Thread.sleep(2000); // 2 s
                 return true;
             } else {
                 createNotification("failed to connect!");
@@ -108,15 +102,13 @@ public class MqttAndroidClient {
 
     private void createNotification(String message) {
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        long[] pattern = {500, 500, 500, 500, 500, 500, 500, 500, 500};
+        long[] pattern = {500, 500, 500, 500, 500, 500, 500};
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(serviceContext)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("My little smarthome")
                         .setContentText(message)
-                        .setLights(Color.YELLOW, 1000, 2000)
-                        .setVibrate(pattern)
-                        .setSound(alarmSound);
+                        .setLights(Color.YELLOW, 1000, 2000);
 
         NotificationManager mNotifyMgr =
                 (NotificationManager) serviceContext.getSystemService(serviceContext.NOTIFICATION_SERVICE);
@@ -126,6 +118,7 @@ public class MqttAndroidClient {
 
     public void closeConnection() {
         try {
+            c.disconnectForcibly();
             c.close();
         } catch (MqttException e) {
             e.printStackTrace();
@@ -134,14 +127,17 @@ public class MqttAndroidClient {
 
     private class MqttCallbackImpl implements MqttCallback {
 
+        @Override
         public void connectionLost(Throwable cause) {
-            createNotification("Connection lost");
-            //connect();
+            //android.os.Debug.waitForDebugger();
+            createNotification(cause.getCause().toString());
+            if (!(cause.getCause() instanceof EOFException)) {
+                connect();
+            }
         }
 
         @Override
         public void deliveryComplete(IMqttDeliveryToken arg0) {
-            // Not needed in this simple demo
         }
 
         @Override
