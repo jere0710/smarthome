@@ -45,7 +45,7 @@ public class WashingMachine implements Runnable {
 
 			List<Integer> selectTheLast5Minutes = db.selectTheLast5Minutes();
 			for (Integer power : selectTheLast5Minutes) {
-				if (power > 1000) {
+				if (power > 1500) {
 					isWashingMachineActive = true;
 				}
 			}
