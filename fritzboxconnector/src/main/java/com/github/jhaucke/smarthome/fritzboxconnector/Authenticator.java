@@ -42,13 +42,15 @@ public class Authenticator {
 
 		SessionInfo sessionInfo = null;
 
-		String responseWithoutCredentials = HttpHelper.executeHttpGet("https://" + fritzBoxHostName + "/login_sid.lua");
+		String responseWithoutCredentials = HttpHelper
+				.executeHttpGet("https://" + fritzBoxHostName + ":48808/login_sid.lua");
 		sessionInfo = convertSessionInfoXML(responseWithoutCredentials);
 
 		if (sessionInfo.getSid().equals(DEFAULT_INVALID_SID)) {
 
 			String responseWithCredentials = HttpHelper
-					.executeHttpGet("https://" + fritzBoxHostName + "/login_sid.lua?username=" + username + "&response="
+					.executeHttpGet("https://" + fritzBoxHostName + ":48808/login_sid.lua?username=" + username
+							+ "&response="
 							+ getResponse(sessionInfo.getChallenge(), password));
 			sessionInfo = convertSessionInfoXML(responseWithCredentials);
 		}

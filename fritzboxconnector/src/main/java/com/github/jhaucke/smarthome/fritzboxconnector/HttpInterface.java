@@ -200,7 +200,7 @@ public class HttpInterface {
 			ainParameter = ainParameter.concat(ain);
 		}
 
-		return "https://" + fritzBoxHostName + "/webservices/homeautoswitch.lua?switchcmd=" + cmd + "&sid=" + sid
+		return "https://" + fritzBoxHostName + ":48808/webservices/homeautoswitch.lua?switchcmd=" + cmd + "&sid=" + sid
 				+ ainParameter;
 	}
 }

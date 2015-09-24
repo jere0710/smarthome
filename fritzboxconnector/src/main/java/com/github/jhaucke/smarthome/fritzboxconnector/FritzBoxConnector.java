@@ -17,7 +17,7 @@ public class FritzBoxConnector {
 	 * @param password
 	 * @param fritzBoxHostName
 	 *            If the FritzBox use the default host name "fritz.box",
-	 *            {@code null} can be passed.
+	 *            {@code null} can be passed, in local network.
 	 * @throws IOException
 	 */
 	public FritzBoxConnector(final String username, final String password, final String fritzBoxHostName)
