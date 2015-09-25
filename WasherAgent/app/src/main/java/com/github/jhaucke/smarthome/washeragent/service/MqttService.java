@@ -1,5 +1,7 @@
 package com.github.jhaucke.smarthome.washeragent.service;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -11,9 +13,12 @@ import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.widget.Toast;
 
+import com.github.jhaucke.smarthome.washeragent.Constants;
+
 public class MqttService extends Service {
 
     private static MyMqttClient client = null;
+    ReconnectAlarmReceiver reconnectAlarmReceiver;
     ConnectivityChangReceiver connectivityChangReceiver;
     private Context serviceContext;
     private Handler toastHandler;
@@ -26,8 +31,7 @@ public class MqttService extends Service {
     public void onCreate() {
         //android.os.Debug.waitForDebugger();
         serviceContext = getApplicationContext();
-        connectivityChangReceiver = new ConnectivityChangReceiver();
-        serviceContext.registerReceiver(connectivityChangReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        registerReceiver();
 
         toastHandler = new Handler(Looper.getMainLooper());
         toastHandler.post(new ToastRunnable("MqttService started"));
@@ -48,8 +52,25 @@ public class MqttService extends Service {
     @Override
     public void onDestroy() {
         client.closeConnection();
-        serviceContext.unregisterReceiver(connectivityChangReceiver);
+        unregisterReceiver();
         toastHandler.post(new ToastRunnable("MqttService stopped"));
+    }
+
+    private void registerReceiver() {
+        reconnectAlarmReceiver = new ReconnectAlarmReceiver();
+        serviceContext.registerReceiver(reconnectAlarmReceiver, new IntentFilter(Constants.RECONNECT_ALARM_ACTION));
+
+        connectivityChangReceiver = new ConnectivityChangReceiver();
+        serviceContext.registerReceiver(connectivityChangReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    private void unregisterReceiver() {
+        serviceContext.unregisterReceiver(reconnectAlarmReceiver);
+        AlarmManager alarmMgr = (AlarmManager) serviceContext.getSystemService(Service.ALARM_SERVICE);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(serviceContext, 0, new Intent(Constants.RECONNECT_ALARM_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmMgr.cancel(alarmIntent);
+
+        serviceContext.unregisterReceiver(connectivityChangReceiver);
     }
 
     private class ToastRunnable implements Runnable {

@@ -13,14 +13,14 @@ import com.github.jhaucke.smarthome.washeragent.R;
 
 import java.util.UUID;
 
-public class ConnectivityChangReceiver extends BroadcastReceiver {
+public class ReconnectAlarmReceiver extends BroadcastReceiver {
 
     private Context context;
 
     @Override
     public void onReceive(Context context, Intent intent) {
         this.context = context;
-        createNotification("network state changed");
+        createNotification("reconnect...");
         MqttService.getClient().connect();
     }
 

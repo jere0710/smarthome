@@ -46,7 +46,7 @@ public class KeepAlivePingSender implements MqttPingSender {
             throw new IllegalArgumentException("ClientComms cannot be null.");
         }
         this.clientComms = clientComms;
-        this.alarmReceiver = new AlarmReceiver();
+        alarmReceiver = new AlarmReceiver();
 
         action = "KeepAlivePingSender.ClientID." + clientComms.getClient().getClientId();
 
@@ -87,18 +87,6 @@ public class KeepAlivePingSender implements MqttPingSender {
         createNotification("schedule " + delayInMilliseconds);
     }
 
-    class AlarmReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            createNotification("onReceive");
-            IMqttToken token = clientComms.checkForActivity();
-            if(token != null) {
-                createNotification("ping transmitted");
-            }
-        }
-    }
-
     private void createNotification(String message) {
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder mBuilder =
@@ -112,5 +100,17 @@ public class KeepAlivePingSender implements MqttPingSender {
                 (NotificationManager) serviceContext.getSystemService(serviceContext.NOTIFICATION_SERVICE);
         // Builds the notification and issues it.
         mNotifyMgr.notify(UUID.randomUUID().hashCode(), mBuilder.build());
+    }
+
+    class AlarmReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            createNotification("onReceive");
+            IMqttToken token = clientComms.checkForActivity();
+            if (token != null) {
+                createNotification("ping transmitted");
+            }
+        }
     }
 }

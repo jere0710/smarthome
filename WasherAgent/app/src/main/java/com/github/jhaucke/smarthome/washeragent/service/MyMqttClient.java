@@ -1,7 +1,11 @@
 package com.github.jhaucke.smarthome.washeragent.service;
 
+import android.app.AlarmManager;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
@@ -10,6 +14,7 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 
+import com.github.jhaucke.smarthome.washeragent.Constants;
 import com.github.jhaucke.smarthome.washeragent.R;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -20,7 +25,6 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
-import java.io.EOFException;
 import java.util.UUID;
 
 public class MyMqttClient {
@@ -32,10 +36,12 @@ public class MyMqttClient {
     private Context serviceContext = null;
     private int retryCount;
     private KeepAlivePingSender pingSender;
+    private boolean isManualClosed;
 
     public MyMqttClient(Context serviceContext, String brokerHost) {
         super();
 
+        isManualClosed = false;
         this.serviceContext = serviceContext;
         this.brokerHost = brokerHost;
         startClient();
@@ -88,16 +94,25 @@ public class MyMqttClient {
     private boolean pause(int retryCount) {
         try {
             if (retryCount < 5) {
-                Thread.sleep(2000); // 2 s
+                Thread.sleep(1000);
                 return true;
             } else {
-                createNotification("failed to connect!");
+                createNotification("failed to connect - retry in one minute!");
+                scheduleReconnectAlarm();
                 return false;
             }
         } catch (InterruptedException e) {
             // Error handling goes here...
         }
         return false;
+    }
+
+    private void scheduleReconnectAlarm() {
+        AlarmManager alarmMgr = (AlarmManager) serviceContext.getSystemService(Service.ALARM_SERVICE);
+        Intent intent = new Intent(Constants.RECONNECT_ALARM_ACTION);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(serviceContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 60000, alarmIntent);
     }
 
     private void createNotification(String message) {
@@ -118,6 +133,7 @@ public class MyMqttClient {
 
     public void closeConnection() {
         try {
+            isManualClosed = true;
             c.disconnectForcibly();
             c.close();
         } catch (MqttException e) {
@@ -130,8 +146,8 @@ public class MyMqttClient {
         @Override
         public void connectionLost(Throwable cause) {
             //android.os.Debug.waitForDebugger();
-            createNotification(cause.getCause().toString());
-            if (!(cause.getCause() instanceof EOFException)) {
+            createNotification("connection lost");
+            if (!isManualClosed) {
                 connect();
             }
         }
