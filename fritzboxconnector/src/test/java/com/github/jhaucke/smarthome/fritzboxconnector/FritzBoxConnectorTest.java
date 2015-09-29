@@ -37,18 +37,18 @@ public class FritzBoxConnectorTest {
 
 		mockStatic(HttpHelper.class);
 
-		String requestWithoutCredentials = "https://fritz.box/login_sid.lua";
+		String requestWithoutCredentials = "https://fritz.box:48808/login_sid.lua";
 		String responseWithoutCredentials = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><SessionInfo><SID>"
 				+ DEFAULT_INVALID_SID
 				+ "</SID><Challenge>1234567z</Challenge><BlockTime></BlockTime><Rights></Rights></SessionInfo>";
 		expect(HttpHelper.executeHttpGet(requestWithoutCredentials)).andStubReturn(responseWithoutCredentials);
 
-		String requestWithCredentials = "https://fritz.box/login_sid.lua?username=testuser&response=1234567z-9e224a41eeefa284df7bb0f26c2913e2";
+		String requestWithCredentials = "https://fritz.box:48808/login_sid.lua?username=testuser&response=1234567z-9e224a41eeefa284df7bb0f26c2913e2";
 		String responseWithCredentials = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><SessionInfo><SID>" + TEST_SID
 				+ "</SID><Challenge>1234567z</Challenge><BlockTime></BlockTime><Rights><Name>Phone</Name><Access>2</Access></Rights></SessionInfo>";
 		expect(HttpHelper.executeHttpGet(requestWithCredentials)).andStubReturn(responseWithCredentials);
 
-		String requestGetSwitchList = "https://fritz.box/webservices/homeautoswitch.lua?switchcmd=getswitchlist&sid=9c977765016899f8";
+		String requestGetSwitchList = "https://fritz.box:48808/webservices/homeautoswitch.lua?switchcmd=getswitchlist&sid=9c977765016899f8";
 		String responseGetSwitchList = TEST_AIN + " ";
 		expect(HttpHelper.executeHttpGet(requestGetSwitchList)).andStubReturn(responseGetSwitchList);
 
