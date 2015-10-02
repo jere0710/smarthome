@@ -47,10 +47,10 @@ public class SQLiteJDBC {
 		logger.info("opened database successfully");
 	}
 
-	public void insertPowerData(int power) {
+	public void insertPowerData(int actuatorId, int power) {
 		try {
 			Statement stmt = c.createStatement();
-			String sql = "INSERT INTO PowerData (Power) VALUES (" + power + ");";
+			String sql = "INSERT INTO PowerData (ID_Actuator, Power) VALUES (" + actuatorId + ", " + power + ");";
 			stmt.executeUpdate(sql);
 			stmt.close();
 		} catch (SQLException e) {
@@ -60,12 +60,12 @@ public class SQLiteJDBC {
 		logger.info("power record created successfully");
 	}
 
-	public List<Integer> selectTheLast2Minutes() {
+	public List<Integer> selectTheLast2Minutes(int actuatorId) {
 		List<Integer> last2Minutes = new ArrayList<Integer>();
 		try {
 			Statement stmt = c.createStatement();
-			ResultSet rs = stmt
-					.executeQuery("SELECT Power FROM PowerData WHERE Timestamp > datetime('now', '-2 minutes');");
+			ResultSet rs = stmt.executeQuery("SELECT Power FROM PowerData WHERE ID_Actuator = " + actuatorId
+					+ " AND Timestamp > datetime('now', '-2 minutes');");
 			while (rs.next()) {
 				last2Minutes.add(rs.getInt("Power"));
 			}

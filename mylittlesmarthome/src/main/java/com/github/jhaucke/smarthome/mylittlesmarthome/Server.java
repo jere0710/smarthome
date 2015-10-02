@@ -4,12 +4,12 @@ import java.io.IOException;
 
 import com.github.jhaucke.smarthome.fritzboxconnector.FritzBoxConnector;
 import com.github.jhaucke.smarthome.fritzboxconnector.HttpInterface;
+import com.github.jhaucke.smarthome.mylittlesmarthome.database.constants.Actuator;
 import com.github.jhaucke.smarthome.mylittlesmarthome.datacollector.WashingMachineDC;
 import com.github.jhaucke.smarthome.mylittlesmarthome.watchdog.WashingMachineWD;
 
 /**
- * Hello world!
- *
+ * The entry point of my little smarthome.
  */
 public class Server {
 	public static void main(String[] args) throws IOException {
@@ -23,9 +23,9 @@ public class Server {
 
 		HttpInterface httpInterface = fritzBoxConnector.getHttpInterface();
 
-		Thread threadWashingMachineDC = new Thread(new WashingMachineDC(httpInterface));
+		Thread threadWashingMachineDC = new Thread(new WashingMachineDC(httpInterface, Actuator.WASHING_MACHINE));
 		threadWashingMachineDC.start();
-		Thread threadWashingMachineWD = new Thread(new WashingMachineWD(httpInterface));
+		Thread threadWashingMachineWD = new Thread(new WashingMachineWD(httpInterface, Actuator.WASHING_MACHINE));
 		threadWashingMachineWD.start();
 	}
 }

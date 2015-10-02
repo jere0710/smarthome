@@ -54,9 +54,8 @@ public class MqttPublisher {
 			sampleClient.disconnect();
 			logger.info("Disconnected");
 		} catch (MqttException me) {
-			logger.error("Reason: " + me.getReasonCode() + newLine + "Msg: " + me.getMessage() + newLine + "Loc: "
-					+ me.getLocalizedMessage() + newLine + "Cause: " + me.getCause() + newLine + "Exception: " + me
-					+ newLine + "StackTrace: " + me.getStackTrace());
+			logger.error("Reason: " + me.getReasonCode() + newLine + "Msg: " + me.getMessage() + newLine + "Cause: "
+					+ me.getCause() + newLine + "Exception: " + me);
 		}
 	}
 }

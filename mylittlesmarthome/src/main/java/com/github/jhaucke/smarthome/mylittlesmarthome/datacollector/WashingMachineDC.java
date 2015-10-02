@@ -18,22 +18,29 @@ public class WashingMachineDC implements Runnable {
 	private final Logger logger;
 
 	private HttpInterface httpInterface;
+	private Actuator washingMachine;
 
 	/**
 	 * Constructor for {@link WashingMachineDC}.
+	 * 
+	 * @param httpInterface
+	 *            The interface to get connection to the actuator
+	 * @param washingMachine
+	 *            The specific actuator
 	 */
-	public WashingMachineDC(HttpInterface httpInterface) {
+	public WashingMachineDC(HttpInterface httpInterface, Actuator washingMachine) {
 		super();
 		logger = LoggerFactory.getLogger(WashingMachineDC.class);
 
 		this.httpInterface = httpInterface;
+		this.washingMachine = washingMachine;
 	}
 
 	@Override
 	public void run() {
 
 		SQLiteJDBC db = new SQLiteJDBC();
-		String ainWashingMachine = Actuator.WASHING_MACHINE.getAIN();
+		String ainWashingMachine = washingMachine.getAIN();
 		MqttPublisher publisher = new MqttPublisher();
 
 		publisher.sendMessage("smarthome/server/info/datacollector/washingmachine", getClass().getName() + " started");
@@ -43,7 +50,7 @@ public class WashingMachineDC implements Runnable {
 				String switchState = httpInterface.getSwitchState(ainWashingMachine);
 				if (switchState.equals("1")) {
 					String switchPower = httpInterface.getSwitchPower(ainWashingMachine);
-					db.insertPowerData(Integer.valueOf(switchPower));
+					db.insertPowerData(washingMachine.getValue(), Integer.valueOf(switchPower));
 				}
 				Thread.sleep(10000);
 			} catch (NumberFormatException | InterruptedException | IOException e) {

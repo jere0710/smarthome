@@ -22,4 +22,13 @@ public enum Actuator {
 			return "";
 		}
 	}
+
+	public int getPowerThreshold() {
+		switch (value) {
+		case 1:
+			return 1500;
+		default:
+			return 0;
+		}
+	}
 }

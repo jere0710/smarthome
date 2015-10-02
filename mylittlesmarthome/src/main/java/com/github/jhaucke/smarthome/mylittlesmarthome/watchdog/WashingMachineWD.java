@@ -21,15 +21,22 @@ public class WashingMachineWD implements Runnable {
 	private final Logger logger;
 
 	private HttpInterface httpInterface;
+	private Actuator washingMachine;
 
 	/**
 	 * Constructor for {@link WashingMachineWD}.
+	 * 
+	 * @param httpInterface
+	 *            The interface to get connection to the actuator
+	 * @param washingMachine
+	 *            The specific actuator
 	 */
-	public WashingMachineWD(HttpInterface httpInterface) {
+	public WashingMachineWD(HttpInterface httpInterface, Actuator washingMachine) {
 		super();
 		logger = LoggerFactory.getLogger(WashingMachineWD.class);
 
 		this.httpInterface = httpInterface;
+		this.washingMachine = washingMachine;
 	}
 
 	@Override
@@ -43,38 +50,38 @@ public class WashingMachineWD implements Runnable {
 		while (true) {
 			boolean isWashingMachineActive = false;
 
-			List<Integer> selectTheLast2Minutes = db.selectTheLast2Minutes();
+			List<Integer> selectTheLast2Minutes = db.selectTheLast2Minutes(washingMachine.getValue());
 			for (Integer power : selectTheLast2Minutes) {
-				if (power > 1500) {
+				if (power > washingMachine.getPowerThreshold()) {
 					isWashingMachineActive = true;
 				}
 			}
 			String switchState = null;
 			try {
-				switchState = httpInterface.getSwitchState(Actuator.WASHING_MACHINE.getAIN());
+				switchState = httpInterface.getSwitchState(washingMachine.getAIN());
 			} catch (IOException ioe) {
 				logger.error(ioe.getMessage());
 			}
-			Integer currentActuatorState = db.selectStateOfActuator(Actuator.WASHING_MACHINE.getValue());
+			Integer currentActuatorState = db.selectStateOfActuator(washingMachine.getValue());
 
 			if (currentActuatorState != null && switchState != null) {
 				if (switchState.equals("0") && currentActuatorState.intValue() != ActuatorState.OFF.getValue()) {
 					publisher.sendMessage("smarthome/devices/washingmachine/state", ActuatorState.OFF.toString());
-					db.updateStateOfActuator(Actuator.WASHING_MACHINE.getValue(), ActuatorState.OFF.getValue());
+					db.updateStateOfActuator(washingMachine.getValue(), ActuatorState.OFF.getValue());
 				}
 				if (switchState.equals("1") && currentActuatorState.intValue() == ActuatorState.OFF.getValue()) {
 					publisher.sendMessage("smarthome/devices/washingmachine/state", ActuatorState.ON.toString());
-					db.updateStateOfActuator(Actuator.WASHING_MACHINE.getValue(), ActuatorState.ON.getValue());
+					db.updateStateOfActuator(washingMachine.getValue(), ActuatorState.ON.getValue());
 				}
 				if (switchState.equals("1") && currentActuatorState.intValue() != ActuatorState.ACTIVE.getValue()
 						&& isWashingMachineActive) {
 					publisher.sendMessage("smarthome/devices/washingmachine/state", ActuatorState.ACTIVE.toString());
-					db.updateStateOfActuator(Actuator.WASHING_MACHINE.getValue(), ActuatorState.ACTIVE.getValue());
+					db.updateStateOfActuator(washingMachine.getValue(), ActuatorState.ACTIVE.getValue());
 				}
 				if (switchState.equals("1") && currentActuatorState.intValue() == ActuatorState.ACTIVE.getValue()
 						&& !isWashingMachineActive) {
 					publisher.sendMessage("smarthome/devices/washingmachine/state", ActuatorState.FINISHED.toString());
-					db.updateStateOfActuator(Actuator.WASHING_MACHINE.getValue(), ActuatorState.FINISHED.getValue());
+					db.updateStateOfActuator(washingMachine.getValue(), ActuatorState.FINISHED.getValue());
 				}
 			}
 
