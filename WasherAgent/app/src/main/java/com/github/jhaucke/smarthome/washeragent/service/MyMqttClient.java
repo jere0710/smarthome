@@ -11,13 +11,18 @@ import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
+import android.telephony.TelephonyManager;
 
 import com.github.jhaucke.smarthome.washeragent.Constants;
 import com.github.jhaucke.smarthome.washeragent.R;
 
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -34,8 +39,9 @@ public class MyMqttClient {
     MqttConnectOptions conOptions;
     MqttCallbackImpl callback;
     private Context serviceContext = null;
-    private int retryCount;
+    private int retryCount = 0;
     private KeepAlivePingSender pingSender;
+    private WakeLock wakelock;
     private boolean isManualClosed;
 
     public MyMqttClient(Context serviceContext, String brokerHost) {
@@ -44,13 +50,13 @@ public class MyMqttClient {
         isManualClosed = false;
         this.serviceContext = serviceContext;
         this.brokerHost = brokerHost;
-        startClient();
+        createClient();
     }
 
-    private void startClient() {
+    private void createClient() {
         try {
             pingSender = new KeepAlivePingSender(serviceContext);
-            c = new MqttAsyncClient("tcp://" + brokerHost + ":1883", Settings.Secure.ANDROID_ID, new MemoryPersistence(), pingSender);
+            c = new MqttAsyncClient("tcp://" + brokerHost + ":1883", getUniqueDeviceId(), new MemoryPersistence(), pingSender);
             callback = new MqttCallbackImpl();
             c.setCallback(callback);
             conOptions = new MqttConnectOptions();
@@ -58,26 +64,53 @@ public class MyMqttClient {
             conOptions.setKeepAliveInterval(1200);
             conOptions.setCleanSession(false);
             connect();
-            c.subscribe("smarthome/#", 2);
         } catch (MqttException e) {
-            createNotification("starting client ERROR");
+            createNotification("createClient ERROR");
         }
     }
 
-    public void connect() {
-        boolean tryConnecting = !c.isConnected() && isConnectedToInternet();
-        retryCount = 0;
-        while (tryConnecting) {
+    private String getUniqueDeviceId() {
+        final TelephonyManager tm = (TelephonyManager) serviceContext.getSystemService(Context.TELEPHONY_SERVICE);
+
+        final String tmDevice, tmSerial, androidId;
+        tmDevice = "" + tm.getDeviceId();
+        tmSerial = "" + tm.getSimSerialNumber();
+        androidId = "" + Settings.Secure.getString(serviceContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
+        return deviceUuid.toString();
+    }
+
+    public synchronized void connect() {
+        if (!c.isConnected() && isConnectedToInternet()) {
+            //acquireWakeLock();
             try {
-                c.connect(conOptions);
-            } catch (Exception e) {
-                //toastHandler.post(new ToastRunnable("failed to connect!"));
-            }
-            if (c.isConnected()) {
-                createNotification("connected");
-                tryConnecting = false;
-            } else {
-                tryConnecting = pause(retryCount++);
+                c.connect(conOptions, serviceContext, new IMqttActionListener() {
+                    @Override
+                    public void onSuccess(IMqttToken iMqttToken) {
+                        try {
+                            c.subscribe("smarthome/#", 2);
+                            createNotification("connected");
+                            retryCount = 0;
+                        } catch (MqttException e) {
+                            createNotification("subscribe ERROR");
+                        } finally {
+                            //releaseWakeLock();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(IMqttToken iMqttToken, Throwable throwable) {
+                        if (pause(retryCount++)) {
+                            //releaseWakeLock();
+                            connect();
+                        }
+                    }
+                });
+            } catch (MqttException e) {
+                if (e.getReasonCode() != 32110) {
+                    createNotification("connect ERROR");
+                }
             }
         }
     }
@@ -102,9 +135,10 @@ public class MyMqttClient {
                 return false;
             }
         } catch (InterruptedException e) {
-            // Error handling goes here...
+            // we do nothing
+        } finally {
+            return true;
         }
-        return false;
     }
 
     private void scheduleReconnectAlarm() {
@@ -116,6 +150,20 @@ public class MyMqttClient {
     }
 
     private void createNotification(String message) {
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(serviceContext)
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentTitle("My little smarthome")
+                        .setContentText(message)
+                        .setLights(Color.YELLOW, 1000, 2000);
+
+        NotificationManager mNotifyMgr =
+                (NotificationManager) serviceContext.getSystemService(serviceContext.NOTIFICATION_SERVICE);
+        // Builds the notification and issues it.
+        mNotifyMgr.notify(UUID.randomUUID().hashCode(), mBuilder.build());
+    }
+
+    private void createNotificationWithSound(String message) {
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         long[] pattern = {500, 500, 500, 500, 500, 500, 500};
         NotificationCompat.Builder mBuilder =
@@ -123,6 +171,8 @@ public class MyMqttClient {
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("My little smarthome")
                         .setContentText(message)
+                        .setSound(alarmSound)
+                        .setVibrate(pattern)
                         .setLights(Color.YELLOW, 1000, 2000);
 
         NotificationManager mNotifyMgr =
@@ -137,16 +187,39 @@ public class MyMqttClient {
             c.disconnectForcibly();
             c.close();
         } catch (MqttException e) {
-            e.printStackTrace();
+            createNotification("closeConnection ERROR");
         }
     }
+
+//    /**
+//     * Acquires a partial wake lock for this client
+//     */
+//    private void acquireWakeLock() {
+//        if (wakelock == null) {
+//            PowerManager pm = (PowerManager) serviceContext
+//                    .getSystemService(Service.POWER_SERVICE);
+//            wakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+//                    Constants.WAKELOCK_CONNECT);
+//        }
+//        wakelock.acquire();
+//
+//    }
+//
+//    /**
+//     * Releases the currently held wake lock for this client
+//     */
+//    private void releaseWakeLock() {
+//        if (wakelock != null && wakelock.isHeld()) {
+//            wakelock.release();
+//        }
+//    }
 
     private class MqttCallbackImpl implements MqttCallback {
 
         @Override
         public void connectionLost(Throwable cause) {
             //android.os.Debug.waitForDebugger();
-            createNotification("connection lost");
+            //createNotification("connection lost");
             if (!isManualClosed) {
                 connect();
             }
@@ -158,8 +231,8 @@ public class MyMqttClient {
 
         @Override
         public void messageArrived(String arg0, MqttMessage arg1) throws Exception {
-            pingSender.schedule(0);
-            createNotification(new String(arg1.getPayload()));
+            createNotificationWithSound(new String(arg1.getPayload()));
+            pingSender.schedule(Long.MIN_VALUE);
         }
     }
 }

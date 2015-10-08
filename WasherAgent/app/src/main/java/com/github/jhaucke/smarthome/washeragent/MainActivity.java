@@ -2,6 +2,7 @@ package com.github.jhaucke.smarthome.washeragent;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -16,6 +17,7 @@ import com.github.jhaucke.smarthome.washeragent.service.MqttService;
 public class MainActivity extends AppCompatActivity {
 
     private Context context = this;
+    private SharedPreferences sharedPreferences;
     private EditText etBrokerHost;
 
     @Override
@@ -24,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         etBrokerHost = (EditText) findViewById(R.id.et_broker_host);
+        sharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
+        etBrokerHost.setText(sharedPreferences.getString(Constants.KEY_BROKER_HOST, ""));
 
         Button btnStartService = (Button) findViewById(R.id.btn_start_service);
         btnStartService.setOnClickListener(new View.OnClickListener() {
@@ -34,8 +38,8 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(context, "Insert broker host name!", Toast.LENGTH_SHORT).show();
                 } else {
 
+                    saveBrokerHost(brokerHost);
                     Intent intent = new Intent(context, MqttService.class);
-                    intent.putExtra("BrokerHost", brokerHost);
                     startService(intent);
                 }
             }
@@ -48,6 +52,12 @@ public class MainActivity extends AppCompatActivity {
                 stopService(new Intent(context, MqttService.class));
             }
         });
+    }
+
+    private void saveBrokerHost(String brokerHost) {
+        SharedPreferences.Editor preferencesEditor = sharedPreferences.edit();
+        preferencesEditor.putString(Constants.KEY_BROKER_HOST, brokerHost);
+        preferencesEditor.commit();
     }
 
     @Override

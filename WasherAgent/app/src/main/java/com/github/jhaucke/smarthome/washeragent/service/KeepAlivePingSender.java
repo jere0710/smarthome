@@ -9,12 +9,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
-import android.media.RingtoneManager;
-import android.net.Uri;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.support.v4.app.NotificationCompat;
 
+import com.github.jhaucke.smarthome.washeragent.Constants;
 import com.github.jhaucke.smarthome.washeragent.R;
 
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttPingSender;
 import org.eclipse.paho.client.mqttv3.internal.ClientComms;
@@ -30,18 +32,17 @@ public class KeepAlivePingSender implements MqttPingSender {
     private AlarmManager alarmMgr;
     private PendingIntent alarmIntent;
     private volatile boolean hasStarted = false;
+    private WakeLock wakelock;
 
     public KeepAlivePingSender(Context serviceContext) {
         if (serviceContext == null) {
             throw new IllegalArgumentException("ServiceContext cannot be null.");
         }
         this.serviceContext = serviceContext;
-        createNotification("construct");
     }
 
     @Override
     public void init(ClientComms clientComms) {
-        createNotification("init");
         if (clientComms == null) {
             throw new IllegalArgumentException("ClientComms cannot be null.");
         }
@@ -59,7 +60,7 @@ public class KeepAlivePingSender implements MqttPingSender {
     public void start() {
         createNotification("start");
         serviceContext.registerReceiver(alarmReceiver, new IntentFilter(action));
-        schedule(0);
+        schedule(Long.MIN_VALUE);
         hasStarted = true;
     }
 
@@ -79,16 +80,17 @@ public class KeepAlivePingSender implements MqttPingSender {
 
     @Override
     public void schedule(long delayInMilliseconds) {
-        delayInMilliseconds = clientComms.getKeepAlive();
+        if (delayInMilliseconds == Long.MIN_VALUE) {
+            delayInMilliseconds = clientComms.getKeepAlive();
+        }
         long nextAlarmInMilliseconds = System.currentTimeMillis()
                 + delayInMilliseconds;
         alarmMgr.set(AlarmManager.RTC_WAKEUP, nextAlarmInMilliseconds,
                 alarmIntent);
-        createNotification("schedule " + delayInMilliseconds);
+        //createNotification("schedule " + delayInMilliseconds);
     }
 
     private void createNotification(String message) {
-        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(serviceContext)
                         .setSmallIcon(R.mipmap.ic_launcher)
@@ -106,11 +108,63 @@ public class KeepAlivePingSender implements MqttPingSender {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            createNotification("onReceive");
+            // Assign new callback to token to execute code after PingResq
+            // arrives. Get another wakelock even receiver already has one,
+            // release it until ping response returns.
+            acquireWakeLock();
+
             IMqttToken token = clientComms.checkForActivity();
-            if (token != null) {
-                createNotification("ping transmitted");
+//            if (token != null) {
+//                //createNotification("ping transmitted");
+//            } else {
+//                //createNotification("ping NOT transmitted");
+//            }
+
+            // No ping has been sent.
+            if (token == null) {
+                releaseWakeLock();
+                return;
             }
+
+            token.setActionCallback(new IMqttActionListener() {
+
+                @Override
+                public void onSuccess(IMqttToken asyncActionToken) {
+                    //Release wakelock when it is done.
+                    releaseWakeLock();
+                }
+
+                @Override
+                public void onFailure(IMqttToken asyncActionToken,
+                                      Throwable exception) {
+                    //Release wakelock when it is done.
+                    releaseWakeLock();
+                }
+            });
+        }
+
+    }
+
+    /**
+     * Acquires a partial wake lock for this client
+     */
+    private void acquireWakeLock() {
+        if (wakelock == null) {
+            PowerManager pm = (PowerManager) serviceContext
+                    .getSystemService(Service.POWER_SERVICE);
+            wakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    Constants.WAKELOCK_KEEP_ALIVE_PING);
+        }
+        wakelock.acquire();
+
+    }
+
+    /**
+     * Releases the currently held wake lock for this client
+     */
+    private void releaseWakeLock() {
+        if (wakelock != null && wakelock.isHeld()) {
+            wakelock.release();
         }
     }
 }
