@@ -1,5 +1,8 @@
 package com.github.jhaucke.smarthome.mylittlesmarthome.mqtt;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -36,7 +39,7 @@ public class MqttPublisher {
 		String newLine = System.getProperty("line.separator");
 		final int qos = 2;
 		final String broker = "tcp://localhost:1883";
-		final String clientId = "WatchDogService";
+		final String clientId = "MyLittleSmarthomeServer";
 		MemoryPersistence persistence = new MemoryPersistence();
 
 		try {
@@ -47,6 +50,7 @@ public class MqttPublisher {
 			sampleClient.connect(connOpts);
 			logger.info("Connected");
 			logger.info("Publishing message: " + content);
+			content = new SimpleDateFormat("HH:mm:ss").format(new Date()) + " - " + content;
 			MqttMessage message = new MqttMessage(content.getBytes());
 			message.setQos(qos);
 			sampleClient.publish(topic, message);
