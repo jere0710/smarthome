@@ -10,7 +10,7 @@ public interface Constants {
 
     public static final String RECONNECT_ALARM_ACTION = APP + ".RECONNECT_ALARM_ACTION";
 
-    public static final String WAKELOCK_KEEP_ALIVE_PING = APP + ".WAKELOCK_KEEP_ALIVE_PING";
+    public static final String ACTION_KEEPALIVEPINGSENDER = APP + ".ACTION_KEEPALIVEPINGSENDER";
 
-    public static final String WAKELOCK_CONNECT = APP + ".WAKELOCK_CONNECT";
+    public static final int NOTIFICATION_ID = 824397105;
 }

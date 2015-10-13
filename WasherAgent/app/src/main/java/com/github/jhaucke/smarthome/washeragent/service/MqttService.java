@@ -34,6 +34,7 @@ public class MqttService extends Service {
         registerReceiver();
 
         toastHandler = new Handler(Looper.getMainLooper());
+        LogWriter.appendLog("MqttService started");
         toastHandler.post(new ToastRunnable("MqttService started"));
     }
 
@@ -55,6 +56,7 @@ public class MqttService extends Service {
     public void onDestroy() {
         client.closeConnection();
         unregisterReceiver();
+        LogWriter.appendLog("MqttService stopped");
         toastHandler.post(new ToastRunnable("MqttService stopped"));
     }
 
