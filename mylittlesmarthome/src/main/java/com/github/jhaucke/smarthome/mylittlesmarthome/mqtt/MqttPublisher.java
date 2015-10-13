@@ -12,29 +12,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class allows to publish a mqtt message to a mqtt broker.
+ * This class allows to publish a mqtt message to the mqtt broker.
  */
 public class MqttPublisher {
 
-	private final Logger logger;
+	private final static Logger logger = LoggerFactory.getLogger(MqttPublisher.class);
 
 	/**
-	 * Constructor for {@link MqttPublisher}.
-	 */
-	public MqttPublisher() {
-		super();
-		logger = LoggerFactory.getLogger(MqttPublisher.class);
-	}
-
-	/**
-	 * Publish a mqtt message to a mqtt broker.
+	 * Publish a mqtt message to the mqtt broker.
 	 * 
 	 * @param topic
 	 *            The topic of the message
 	 * @param content
 	 *            The message
 	 */
-	public void sendMessage(String topic, String content) {
+	public synchronized static void sendMessage(String topic, String content) {
 
 		String newLine = System.getProperty("line.separator");
 		final int qos = 2;

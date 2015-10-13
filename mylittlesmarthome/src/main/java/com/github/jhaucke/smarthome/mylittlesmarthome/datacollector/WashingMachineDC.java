@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import com.github.jhaucke.smarthome.fritzboxconnector.HttpInterface;
 import com.github.jhaucke.smarthome.mylittlesmarthome.database.SQLiteJDBC;
 import com.github.jhaucke.smarthome.mylittlesmarthome.database.constants.Actuator;
-import com.github.jhaucke.smarthome.mylittlesmarthome.mqtt.MqttPublisher;
 
 /**
  * {@link Runnable} to collect the power consumption of the washing machine.
@@ -41,9 +40,6 @@ public class WashingMachineDC implements Runnable {
 
 		SQLiteJDBC db = new SQLiteJDBC();
 		String ainWashingMachine = washingMachine.getAIN();
-		MqttPublisher publisher = new MqttPublisher();
-
-		publisher.sendMessage("smarthome/server/info/datacollector/washingmachine", getClass().getName() + " started");
 
 		while (true) {
 			try {

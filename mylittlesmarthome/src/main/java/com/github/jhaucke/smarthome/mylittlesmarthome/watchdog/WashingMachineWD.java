@@ -43,9 +43,6 @@ public class WashingMachineWD implements Runnable {
 	public void run() {
 
 		SQLiteJDBC db = new SQLiteJDBC();
-		MqttPublisher publisher = new MqttPublisher();
-
-		publisher.sendMessage("smarthome/server/info/watchdog/washingmachine", getClass().getName() + " started");
 
 		while (true) {
 			boolean isWashingMachineActive = false;
@@ -66,21 +63,23 @@ public class WashingMachineWD implements Runnable {
 
 			if (currentActuatorState != null && switchState != null) {
 				if (switchState.equals("0") && currentActuatorState.intValue() != ActuatorState.OFF.getValue()) {
-					publisher.sendMessage("smarthome/devices/washingmachine/state", ActuatorState.OFF.toString());
+					MqttPublisher.sendMessage("smarthome/devices/washingmachine/state", ActuatorState.OFF.toString());
 					db.updateStateOfActuator(washingMachine.getValue(), ActuatorState.OFF.getValue());
 				}
 				if (switchState.equals("1") && currentActuatorState.intValue() == ActuatorState.OFF.getValue()) {
-					publisher.sendMessage("smarthome/devices/washingmachine/state", ActuatorState.ON.toString());
+					MqttPublisher.sendMessage("smarthome/devices/washingmachine/state", ActuatorState.ON.toString());
 					db.updateStateOfActuator(washingMachine.getValue(), ActuatorState.ON.getValue());
 				}
 				if (switchState.equals("1") && currentActuatorState.intValue() != ActuatorState.ACTIVE.getValue()
 						&& isWashingMachineActive) {
-					publisher.sendMessage("smarthome/devices/washingmachine/state", ActuatorState.ACTIVE.toString());
+					MqttPublisher.sendMessage("smarthome/devices/washingmachine/state",
+							ActuatorState.ACTIVE.toString());
 					db.updateStateOfActuator(washingMachine.getValue(), ActuatorState.ACTIVE.getValue());
 				}
 				if (switchState.equals("1") && currentActuatorState.intValue() == ActuatorState.ACTIVE.getValue()
 						&& !isWashingMachineActive) {
-					publisher.sendMessage("smarthome/devices/washingmachine/state", ActuatorState.FINISHED.toString());
+					MqttPublisher.sendMessage("smarthome/devices/washingmachine/state",
+							ActuatorState.FINISHED.toString());
 					db.updateStateOfActuator(washingMachine.getValue(), ActuatorState.FINISHED.getValue());
 				}
 			}

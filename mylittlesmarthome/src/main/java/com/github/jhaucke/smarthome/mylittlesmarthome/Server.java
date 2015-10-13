@@ -6,6 +6,7 @@ import com.github.jhaucke.smarthome.fritzboxconnector.FritzBoxConnector;
 import com.github.jhaucke.smarthome.fritzboxconnector.HttpInterface;
 import com.github.jhaucke.smarthome.mylittlesmarthome.database.constants.Actuator;
 import com.github.jhaucke.smarthome.mylittlesmarthome.datacollector.WashingMachineDC;
+import com.github.jhaucke.smarthome.mylittlesmarthome.mqtt.MqttPublisher;
 import com.github.jhaucke.smarthome.mylittlesmarthome.watchdog.WashingMachineWD;
 
 /**
@@ -27,5 +28,7 @@ public class Server {
 		threadWashingMachineDC.start();
 		Thread threadWashingMachineWD = new Thread(new WashingMachineWD(httpInterface, Actuator.WASHING_MACHINE));
 		threadWashingMachineWD.start();
+
+		MqttPublisher.sendMessage("smarthome/server/info", "Server started");
 	}
 }
