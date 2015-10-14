@@ -51,7 +51,7 @@ public class MyMqttClient {
             c.setCallback(callback);
             conOptions = new MqttConnectOptions();
             conOptions.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
-            conOptions.setKeepAliveInterval(1200);
+            conOptions.setKeepAliveInterval(Constants.KEEP_ALIVE_INTERVAL);
             conOptions.setCleanSession(false);
             connect();
         } catch (MqttException e) {
@@ -130,7 +130,7 @@ public class MyMqttClient {
         Intent intent = new Intent(Constants.RECONNECT_ALARM_ACTION);
         PendingIntent alarmIntent = PendingIntent.getBroadcast(serviceContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 60000, alarmIntent);
+        alarmMgr.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 60000, alarmIntent);
     }
 
     public void closeConnection() {

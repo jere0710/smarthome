@@ -38,7 +38,7 @@ public class KeepAlivePingSender implements MqttPingSender {
         this.clientComms = clientComms;
         alarmReceiver = new AlarmReceiver();
 
-        action = Constants.ACTION_KEEPALIVEPINGSENDER;
+        action = Constants.ACTION_KEEP_ALIVE_PING_SENDER;
 
         alarmMgr = (AlarmManager) serviceContext.getSystemService(Service.ALARM_SERVICE);
         Intent intent = new Intent(action);
@@ -75,8 +75,7 @@ public class KeepAlivePingSender implements MqttPingSender {
         long nextAlarmInMilliseconds = System.currentTimeMillis()
                 + delayInMilliseconds;
         LogWriter.appendLog("next ping in " + delayInMilliseconds / 1000 + " s");
-        alarmMgr.set(AlarmManager.RTC_WAKEUP, nextAlarmInMilliseconds,
-                alarmIntent);
+        alarmMgr.setWindow(AlarmManager.RTC_WAKEUP, nextAlarmInMilliseconds, Constants.ALARM_WINDOW_KEEP_ALIVE_PING, alarmIntent);
     }
 
     class AlarmReceiver extends BroadcastReceiver {
