@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 
@@ -32,6 +33,7 @@ public class MyMqttClient {
     private int retryCount = 0;
     private KeepAlivePingSender pingSender;
     private boolean isManualClosed;
+    private PowerManager.WakeLock wakelock = null;
 
     public MyMqttClient(Context serviceContext, String brokerHost) {
         super();
@@ -118,19 +120,20 @@ public class MyMqttClient {
                 return false;
             }
         } catch (InterruptedException e) {
-            // we do nothing
-        } finally {
             return true;
         }
     }
 
     private void scheduleReconnectAlarm() {
-        LogWriter.appendLog("scheduleReconnectAlarm");
+        acquireWakeLock();
+        retryCount = 0;
+        LogWriter.appendLog("schedule Reconnect Alarm");
         AlarmManager alarmMgr = (AlarmManager) serviceContext.getSystemService(Service.ALARM_SERVICE);
         Intent intent = new Intent(Constants.RECONNECT_ALARM_ACTION);
         PendingIntent alarmIntent = PendingIntent.getBroadcast(serviceContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         alarmMgr.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 60000, alarmIntent);
+        releaseWakeLock();
     }
 
     public void closeConnection() {
@@ -140,6 +143,29 @@ public class MyMqttClient {
             c.close();
         } catch (MqttException e) {
             LogWriter.appendLog("closeConnection ERROR");
+        }
+    }
+
+    /**
+     * Acquires a partial wake lock for the client
+     */
+    private void acquireWakeLock() {
+        if (wakelock == null) {
+            PowerManager pm = (PowerManager) serviceContext
+                    .getSystemService(Service.POWER_SERVICE);
+            wakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    Constants.WAKE_LOCK_TAG_MQTT_CLIENT);
+        }
+        wakelock.acquire();
+
+    }
+
+    /**
+     * Releases the currently held wake lock for the client
+     */
+    private void releaseWakeLock() {
+        if (wakelock != null && wakelock.isHeld()) {
+            wakelock.release();
         }
     }
 
@@ -159,9 +185,11 @@ public class MyMqttClient {
 
         @Override
         public void messageArrived(String arg0, MqttMessage arg1) throws Exception {
+            acquireWakeLock();
             pingSender.schedule(Long.MIN_VALUE);
             LogWriter.appendLog(new String(arg1.getPayload()));
             NotificationHelper.createNotificationWithSound(serviceContext, new String(arg1.getPayload()));
+            releaseWakeLock();
         }
     }
 }

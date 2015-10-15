@@ -12,6 +12,8 @@ public interface Constants {
 
     public static final String ACTION_KEEP_ALIVE_PING_SENDER = APP + ".ACTION_KEEP_ALIVE_PING_SENDER";
 
+    public static final String WAKE_LOCK_TAG_MQTT_CLIENT = APP + ".WAKE_LOCK_TAG_MQTT_CLIENT";
+
     public static final int NOTIFICATION_ID = 824397105;
 
     /**
