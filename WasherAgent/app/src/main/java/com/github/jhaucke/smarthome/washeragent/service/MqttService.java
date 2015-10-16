@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -22,6 +23,7 @@ public class MqttService extends Service {
     ConnectivityChangReceiver connectivityChangReceiver;
     private Context serviceContext;
     private Handler toastHandler;
+    private WifiManager.WifiLock wifiLock = null;
 
     public static MyMqttClient getClient() {
         return client;
@@ -31,6 +33,14 @@ public class MqttService extends Service {
     public void onCreate() {
         //android.os.Debug.waitForDebugger();
         serviceContext = getApplicationContext();
+        if (wifiLock == null) {
+            WifiManager wm = (WifiManager) serviceContext.getSystemService(Context.WIFI_SERVICE);
+            wifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, Constants.WIFI_LOCK_TAG_MQTT_CLIENT);
+        }
+
+        if (!wifiLock.isHeld()) {
+            wifiLock.acquire();
+        }
         registerReceiver();
 
         toastHandler = new Handler(Looper.getMainLooper());
@@ -40,8 +50,7 @@ public class MqttService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String brokerHost = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, MODE_PRIVATE).
-                getString(Constants.KEY_BROKER_HOST, "");
+        String brokerHost = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, MODE_PRIVATE).getString(Constants.KEY_BROKER_HOST, "");
         client = new MyMqttClient(serviceContext, brokerHost);
         return Service.START_STICKY;
     }
@@ -56,6 +65,12 @@ public class MqttService extends Service {
     public void onDestroy() {
         client.closeConnection();
         unregisterReceiver();
+        // release the WifiLock
+        if (wifiLock != null) {
+            if (wifiLock.isHeld()) {
+                wifiLock.release();
+            }
+        }
         LogWriter.appendLog("MqttService stopped");
         toastHandler.post(new ToastRunnable("MqttService stopped"));
     }

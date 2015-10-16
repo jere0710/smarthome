@@ -14,6 +14,8 @@ public interface Constants {
 
     public static final String WAKE_LOCK_TAG_MQTT_CLIENT = APP + ".WAKE_LOCK_TAG_MQTT_CLIENT";
 
+    public static final String WIFI_LOCK_TAG_MQTT_CLIENT = APP + ".WIFI_LOCK_TAG_MQTT_CLIENT";
+
     public static final int NOTIFICATION_ID = 824397105;
 
     /**

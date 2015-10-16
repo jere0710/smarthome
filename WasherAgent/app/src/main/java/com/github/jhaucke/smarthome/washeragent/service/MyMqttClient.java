@@ -101,12 +101,10 @@ public class MyMqttClient {
     }
 
     private boolean isConnectedToInternet() {
-        ConnectivityManager cm =
-                (ConnectivityManager) serviceContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager cm = (ConnectivityManager) serviceContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 
     private boolean pause(int retryCount) {
@@ -151,10 +149,8 @@ public class MyMqttClient {
      */
     private void acquireWakeLock() {
         if (wakelock == null) {
-            PowerManager pm = (PowerManager) serviceContext
-                    .getSystemService(Service.POWER_SERVICE);
-            wakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                    Constants.WAKE_LOCK_TAG_MQTT_CLIENT);
+            PowerManager pm = (PowerManager) serviceContext.getSystemService(Service.POWER_SERVICE);
+            wakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, Constants.WAKE_LOCK_TAG_MQTT_CLIENT);
         }
         wakelock.acquire();
 
