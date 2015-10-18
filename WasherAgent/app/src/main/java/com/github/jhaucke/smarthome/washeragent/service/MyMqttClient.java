@@ -34,6 +34,7 @@ public class MyMqttClient {
     private KeepAlivePingSender pingSender;
     private boolean isManualClosed;
     private PowerManager.WakeLock wakelock = null;
+    private NotificationHelper notificationHelper = null;
 
     public MyMqttClient(Context serviceContext, String brokerHost) {
         super();
@@ -42,6 +43,7 @@ public class MyMqttClient {
         this.serviceContext = serviceContext;
         this.brokerHost = brokerHost;
         createClient();
+        notificationHelper = new NotificationHelper(serviceContext);
     }
 
     private void createClient() {
@@ -184,7 +186,7 @@ public class MyMqttClient {
             acquireWakeLock();
             pingSender.schedule(Long.MIN_VALUE);
             LogWriter.appendLog(new String(arg1.getPayload()));
-            NotificationHelper.createNotificationWithSound(serviceContext, new String(arg1.getPayload()));
+            notificationHelper.createNotification(new String(arg1.getPayload()));
             releaseWakeLock();
         }
     }

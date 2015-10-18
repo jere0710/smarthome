@@ -1,6 +1,7 @@
 package com.github.jhaucke.smarthome.washeragent.service;
 
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -71,8 +72,14 @@ public class MqttService extends Service {
                 wifiLock.release();
             }
         }
+        cancelNotification();
         LogWriter.appendLog("MqttService stopped");
         toastHandler.post(new ToastRunnable("MqttService stopped"));
+    }
+
+    private void cancelNotification() {
+        NotificationManager notifyMgr = (NotificationManager) serviceContext.getSystemService(serviceContext.NOTIFICATION_SERVICE);
+        notifyMgr.cancel(Constants.NOTIFICATION_ID);
     }
 
     private void registerReceiver() {
