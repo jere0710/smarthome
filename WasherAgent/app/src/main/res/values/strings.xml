@@ -2,11 +2,19 @@
     <string name="app_name">Washer Agent</string>
     <string name="service_name">MqttService</string>
 
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 
-    <string name="tv_broker_host">Borker-Host:</string>
+    <string name="tv_broker_host">Broker-Host:</string>
     
     <string name="btn_start_service">start service</string>
     <string name="btn_stop_service">stop service</string>
+
+    <string name="toast_insert_broker_host">Bitte Broker-Host eintragen!</string>
+    <string name="toast_service_started">Service gestartet</string>
+    <string name="toast_service_stopped">Service angehalten</string>
+
+    <string name="notify_washer_on">Die Waschmaschine ist eingeschaltet.</string>
+    <string name="notify_washer_active">Die Waschmaschine wäscht...</string>
+    <string name="notify_washer_finished">Die Waschmaschine ist fertig!</string>
+
 </resources>

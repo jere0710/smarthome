@@ -12,6 +12,11 @@ import com.github.jhaucke.smarthome.washeragent.R;
 
 public class NotificationHelper {
 
+    public static final String STATE_OFF = "OFF";
+    public static final String STATE_ON = "ON";
+    public static final String STATE_ACTIVE = "ACTIVE";
+    public static final String STATE_FINISHED = "FINISHED";
+
     private Context serviceContext;
     private String state = null;
     private NotificationManager notifyMgr;
@@ -22,8 +27,8 @@ public class NotificationHelper {
     }
 
     public void createNotification(String message) {
-        String[] splitedMessage = message.split("-");
-        String newState = splitedMessage[1].trim();
+        String[] splittedMessage = message.split("-");
+        String newState = splittedMessage[1].trim();
         if (state == null || !state.equals(newState)) {
             state = newState;
         } else {
@@ -31,17 +36,23 @@ public class NotificationHelper {
             return;
         }
 
-        if (newState.equals("OFF")) {
-            notifyMgr.cancel(Constants.NOTIFICATION_ID);
-        }
-        if (newState.equals("ON")) {
-            buildAndFireNotification(serviceContext, message, R.drawable.ic_stat_on);
-        }
-        if (newState.equals("ACTIVE")) {
-            buildAndFireNotification(serviceContext, message, R.drawable.ic_stat_active);
-        }
-        if (newState.equals("FINISHED")) {
-            buildAndFireNotification(serviceContext, message, R.drawable.ic_stat_finished);
+        switch (newState) {
+            case STATE_OFF:
+                notifyMgr.cancel(Constants.NOTIFICATION_ID);
+                break;
+            case STATE_ON:
+                buildAndFireNotification(serviceContext, serviceContext.getResources().getString(R.string.notify_washer_on), R.drawable.ic_stat_on);
+                break;
+            case STATE_ACTIVE:
+                buildAndFireNotification(serviceContext, serviceContext.getResources().getString(R.string.notify_washer_active), R.drawable.ic_stat_active);
+                break;
+            case STATE_FINISHED:
+                buildAndFireNotification(serviceContext, serviceContext.getResources().getString(R.string.notify_washer_finished), R.drawable.ic_stat_finished);
+                break;
+
+            default:
+                buildAndFireNotification(serviceContext, message, R.mipmap.ic_launcher);
+                break;
         }
     }
 
@@ -51,7 +62,7 @@ public class NotificationHelper {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(serviceContext)
                         .setSmallIcon(icon)
-                        .setContentTitle("My little smarthome")
+                        .setContentTitle(serviceContext.getResources().getString(R.string.app_name))
                         .setContentText(message)
                         .setOngoing(true)
                         .setSound(alarmSound)

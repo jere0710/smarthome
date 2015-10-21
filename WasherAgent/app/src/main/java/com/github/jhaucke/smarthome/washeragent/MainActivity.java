@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String brokerHost = etBrokerHost.getText().toString().trim();
                 if (brokerHost.equals("")) {
-                    Toast.makeText(context, "Insert broker host name!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, getResources().getString(R.string.toast_insert_broker_host), Toast.LENGTH_LONG).show();
                 } else {
 
                     saveBrokerHost(brokerHost);

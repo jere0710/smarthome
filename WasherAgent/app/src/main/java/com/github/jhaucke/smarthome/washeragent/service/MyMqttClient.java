@@ -178,15 +178,16 @@ public class MyMqttClient {
         }
 
         @Override
-        public void deliveryComplete(IMqttDeliveryToken arg0) {
+        public void deliveryComplete(IMqttDeliveryToken token) {
         }
 
         @Override
-        public void messageArrived(String arg0, MqttMessage arg1) throws Exception {
+        public void messageArrived(String topic, MqttMessage message) throws Exception {
             acquireWakeLock();
             pingSender.schedule(Long.MIN_VALUE);
-            LogWriter.appendLog(new String(arg1.getPayload()));
-            notificationHelper.createNotification(new String(arg1.getPayload()));
+            String msgText = new String(message.getPayload());
+            LogWriter.appendLog(msgText);
+            notificationHelper.createNotification(msgText);
             releaseWakeLock();
         }
     }

@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.widget.Toast;
 
 import com.github.jhaucke.smarthome.washeragent.Constants;
+import com.github.jhaucke.smarthome.washeragent.R;
 
 public class MqttService extends Service {
 
@@ -35,7 +36,7 @@ public class MqttService extends Service {
 
         toastHandler = new Handler(Looper.getMainLooper());
         LogWriter.appendLog("MqttService started");
-        toastHandler.post(new ToastRunnable("MqttService started"));
+        toastHandler.post(new ToastRunnable(serviceContext.getResources().getString(R.string.toast_service_started)));
     }
 
     @Override
@@ -57,7 +58,7 @@ public class MqttService extends Service {
         unregisterReceiver();
         cancelNotification();
         LogWriter.appendLog("MqttService stopped");
-        toastHandler.post(new ToastRunnable("MqttService stopped"));
+        toastHandler.post(new ToastRunnable(serviceContext.getResources().getString(R.string.toast_service_stopped)));
     }
 
     private void cancelNotification() {
