@@ -43,12 +43,13 @@ public class WashingMachineWD implements Runnable {
 	public void run() {
 
 		SQLiteJDBC db = new SQLiteJDBC();
+		String topic = "smarthome/devices/washingmachine/state";
 
 		while (true) {
 			boolean isWashingMachineActive = false;
 
-			List<Integer> selectTheLast2Minutes = db.selectTheLast2Minutes(washingMachine.getValue());
-			for (Integer power : selectTheLast2Minutes) {
+			List<Integer> selectTheLast3Minutes = db.selectTheLast3Minutes(washingMachine.getValue());
+			for (Integer power : selectTheLast3Minutes) {
 				if (power > washingMachine.getPowerThreshold()) {
 					isWashingMachineActive = true;
 				}
@@ -63,22 +64,22 @@ public class WashingMachineWD implements Runnable {
 
 			if (currentActuatorState != null && switchState != null) {
 				if (switchState.equals("0") && currentActuatorState.intValue() != ActuatorState.OFF.getValue()) {
-					MqttPublisher.sendMessage("smarthome/devices/washingmachine/state", ActuatorState.OFF.toString());
+					MqttPublisher.sendMessage(topic, ActuatorState.OFF.toString());
 					db.updateStateOfActuator(washingMachine.getValue(), ActuatorState.OFF.getValue());
 				}
 				if (switchState.equals("1") && currentActuatorState.intValue() == ActuatorState.OFF.getValue()) {
-					MqttPublisher.sendMessage("smarthome/devices/washingmachine/state", ActuatorState.ON.toString());
+					MqttPublisher.sendMessage(topic, ActuatorState.ON.toString());
 					db.updateStateOfActuator(washingMachine.getValue(), ActuatorState.ON.getValue());
 				}
 				if (switchState.equals("1") && currentActuatorState.intValue() != ActuatorState.ACTIVE.getValue()
 						&& isWashingMachineActive) {
-					MqttPublisher.sendMessage("smarthome/devices/washingmachine/state",
+					MqttPublisher.sendMessage(topic,
 							ActuatorState.ACTIVE.toString());
 					db.updateStateOfActuator(washingMachine.getValue(), ActuatorState.ACTIVE.getValue());
 				}
 				if (switchState.equals("1") && currentActuatorState.intValue() == ActuatorState.ACTIVE.getValue()
 						&& !isWashingMachineActive) {
-					MqttPublisher.sendMessage("smarthome/devices/washingmachine/state",
+					MqttPublisher.sendMessage(topic,
 							ActuatorState.FINISHED.toString());
 					db.updateStateOfActuator(washingMachine.getValue(), ActuatorState.FINISHED.getValue());
 				}

@@ -60,14 +60,14 @@ public class SQLiteJDBC {
 		logger.info("power record created successfully");
 	}
 
-	public List<Integer> selectTheLast2Minutes(int actuatorId) {
-		List<Integer> last2Minutes = new ArrayList<Integer>();
+	public List<Integer> selectTheLast3Minutes(int actuatorId) {
+		List<Integer> last3Minutes = new ArrayList<Integer>();
 		try {
 			Statement stmt = c.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT Power FROM PowerData WHERE ID_Actuator = " + actuatorId
-					+ " AND Timestamp > datetime('now', '-2 minutes');");
+					+ " AND Timestamp > datetime('now', '-3 minutes');");
 			while (rs.next()) {
-				last2Minutes.add(rs.getInt("Power"));
+				last3Minutes.add(rs.getInt("Power"));
 			}
 			rs.close();
 			stmt.close();
@@ -75,8 +75,8 @@ public class SQLiteJDBC {
 			logger.error("state: " + e.getSQLState() + " code: " + e.getErrorCode() + " message: " + e.getMessage()
 					+ " cause: " + e.getCause());
 		}
-		logger.info("last 2 minutes selected");
-		return last2Minutes;
+		logger.info("last 3 minutes selected");
+		return last3Minutes;
 	}
 
 	public Integer selectStateOfActuator(int actuatorId) {
