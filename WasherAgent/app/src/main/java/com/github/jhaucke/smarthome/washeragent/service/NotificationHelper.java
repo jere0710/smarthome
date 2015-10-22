@@ -41,22 +41,22 @@ public class NotificationHelper {
                 notifyMgr.cancel(Constants.NOTIFICATION_ID);
                 break;
             case STATE_ON:
-                buildAndFireNotification(serviceContext, serviceContext.getResources().getString(R.string.notify_washer_on), R.drawable.ic_stat_on);
+                buildAndFireNotification(serviceContext, serviceContext.getResources().getString(R.string.notify_washer_on), R.drawable.ic_stat_on, true);
                 break;
             case STATE_ACTIVE:
-                buildAndFireNotification(serviceContext, serviceContext.getResources().getString(R.string.notify_washer_active), R.drawable.ic_stat_active);
+                buildAndFireNotification(serviceContext, serviceContext.getResources().getString(R.string.notify_washer_active), R.drawable.ic_stat_active, true);
                 break;
             case STATE_FINISHED:
-                buildAndFireNotification(serviceContext, serviceContext.getResources().getString(R.string.notify_washer_finished), R.drawable.ic_stat_finished);
+                buildAndFireNotification(serviceContext, serviceContext.getResources().getString(R.string.notify_washer_finished), R.drawable.ic_stat_finished, true);
                 break;
 
             default:
-                buildAndFireNotification(serviceContext, message, R.mipmap.ic_launcher);
+                buildAndFireNotification(serviceContext, message, R.mipmap.ic_launcher, false);
                 break;
         }
     }
 
-    private void buildAndFireNotification(Context serviceContext, String message, int icon) {
+    private void buildAndFireNotification(Context serviceContext, String message, int icon, boolean isOngoing) {
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         long[] pattern = {500, 500, 500, 500, 500, 500, 500};
         NotificationCompat.Builder mBuilder =
@@ -64,7 +64,7 @@ public class NotificationHelper {
                         .setSmallIcon(icon)
                         .setContentTitle(serviceContext.getResources().getString(R.string.app_name))
                         .setContentText(message)
-                        .setOngoing(true)
+                        .setOngoing(isOngoing)
                         .setSound(alarmSound)
                         .setVibrate(pattern)
                         .setLights(Color.YELLOW, 1000, 2000);
