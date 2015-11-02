@@ -7,9 +7,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.PowerManager;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 
 import com.github.jhaucke.smarthome.washeragent.Constants;
 
@@ -25,88 +26,129 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 public class MyMqttClient {
 
-    private static String brokerHost;
-    MqttAsyncClient c;
-    MqttConnectOptions conOptions;
-    MqttCallbackImpl callback;
+    private MqttAsyncClient c;
+    private MqttConnectOptions conOptions;
+    private MqttCallbackImpl callback;
     private Context serviceContext = null;
     private int retryCount = 0;
     private KeepAlivePingSender pingSender;
-    private boolean isManualClosed;
+    private boolean isManualClosed = false;
     private PowerManager.WakeLock wakelock = null;
     private NotificationHelper notificationHelper = null;
+    private boolean isConnectedToBrokerLAN;
+    private boolean currentClientIsForBrokerLAN;
 
-    public MyMqttClient(Context serviceContext, String brokerHost) {
+    public MyMqttClient(Context serviceContext) {
         super();
 
-        isManualClosed = false;
         this.serviceContext = serviceContext;
-        this.brokerHost = brokerHost;
-        createClient();
+        createConnectOptions();
+        connect();
         notificationHelper = new NotificationHelper(serviceContext);
     }
 
-    private void createClient() {
+    public synchronized void connect() {
+        if (isConnectedToInternet()) {
+            createClientIfNeeded();
+            LogWriter.appendLog("do connect");
+            if (!c.isConnected()) {
+                LogWriter.appendLog("try connecting...");
+                try {
+                    c.connect(conOptions, serviceContext, new IMqttActionListener() {
+                        @Override
+                        public void onSuccess(IMqttToken iMqttToken) {
+                            try {
+                                c.subscribe("smarthome/#", 2);
+                                LogWriter.appendLog("connected");
+                                retryCount = 0;
+                            } catch (MqttException e) {
+                                LogWriter.appendLog("subscribe ERROR");
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(IMqttToken iMqttToken, Throwable throwable) {
+                            if (pause(retryCount++)) {
+                                LogWriter.appendLog("connect failed - retry " + retryCount);
+                                connect();
+                            }
+                        }
+                    });
+                } catch (MqttException e) {
+                    if (e.getReasonCode() != 32110) {
+                        LogWriter.appendLog("connect ERROR");
+                    }
+                }
+            }
+        }
+    }
+
+    private void createClientIfNeeded() {
+        String keyBrokerHost = null;
+        if (((isConnectedToBrokerLAN && currentClientIsForBrokerLAN)
+                || (!isConnectedToBrokerLAN && !currentClientIsForBrokerLAN)) && c != null) {
+            return;
+        }
+        if (isConnectedToBrokerLAN && !currentClientIsForBrokerLAN) {
+            LogWriter.appendLog("KEY_BROKER_HOST_LAN");
+            keyBrokerHost = Constants.KEY_BROKER_HOST_LAN;
+            currentClientIsForBrokerLAN = true;
+        } else {
+            LogWriter.appendLog("KEY_BROKER_HOST");
+            keyBrokerHost = Constants.KEY_BROKER_HOST;
+            currentClientIsForBrokerLAN = false;
+        }
         try {
             pingSender = new KeepAlivePingSender(serviceContext);
             LogWriter.appendLog("UniqueDeviceId: " + getUniqueDeviceId());
+            String brokerHost = serviceContext.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, serviceContext.MODE_PRIVATE).getString(keyBrokerHost, "");
             c = new MqttAsyncClient("tcp://" + brokerHost + ":1883", getUniqueDeviceId(), new MemoryPersistence(), pingSender);
             callback = new MqttCallbackImpl();
             c.setCallback(callback);
-            conOptions = new MqttConnectOptions();
-            conOptions.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
-            conOptions.setKeepAliveInterval(Constants.KEEP_ALIVE_INTERVAL);
-            conOptions.setCleanSession(false);
-            connect();
         } catch (MqttException e) {
             LogWriter.appendLog("createClient ERROR");
         }
     }
 
-    private String getUniqueDeviceId() {
-        final TelephonyManager tm = (TelephonyManager) serviceContext.getSystemService(Context.TELEPHONY_SERVICE);
-        String androidId = Settings.Secure.getString(serviceContext.getContentResolver(), Settings.Secure.ANDROID_ID);
-        return String.valueOf(androidId.hashCode());
+    private void createConnectOptions() {
+        conOptions = new MqttConnectOptions();
+        conOptions.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
+        conOptions.setKeepAliveInterval(Constants.KEEP_ALIVE_INTERVAL);
+        conOptions.setCleanSession(false);
     }
 
-    public synchronized void connect() {
-        LogWriter.appendLog("do connect");
-        if (!c.isConnected() && isConnectedToInternet()) {
-            LogWriter.appendLog("try connecting...");
-            try {
-                c.connect(conOptions, serviceContext, new IMqttActionListener() {
-                    @Override
-                    public void onSuccess(IMqttToken iMqttToken) {
-                        try {
-                            c.subscribe("smarthome/#", 2);
-                            LogWriter.appendLog("connected");
-                            retryCount = 0;
-                        } catch (MqttException e) {
-                            LogWriter.appendLog("subscribe ERROR");
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(IMqttToken iMqttToken, Throwable throwable) {
-                        if (pause(retryCount++)) {
-                            LogWriter.appendLog("connect failed - retry " + retryCount);
-                            connect();
-                        }
-                    }
-                });
-            } catch (MqttException e) {
-                if (e.getReasonCode() != 32110) {
-                    LogWriter.appendLog("connect ERROR");
-                }
-            }
-        }
+    private String getUniqueDeviceId() {
+        String androidId = Settings.Secure.getString(serviceContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+        return String.valueOf(androidId.hashCode());
     }
 
     private boolean isConnectedToInternet() {
         ConnectivityManager cm = (ConnectivityManager) serviceContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        if (activeNetwork != null && activeNetwork.isConnectedOrConnecting()) {
+            checkIfConnectedToBrockerLAN(cm);
+            return true;
+        }
+        return false;
+    }
+
+    private void checkIfConnectedToBrockerLAN(ConnectivityManager cm) {
+        NetworkInfo wifi = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+        if (wifi.isConnectedOrConnecting()) {
+            final WifiManager wifiManager = (WifiManager) serviceContext.getSystemService(Context.WIFI_SERVICE);
+            final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
+            if (connectionInfo != null) {
+                if (connectionInfo.getSSID().equals("\"WLAN Router 135\"")) {
+                    isConnectedToBrokerLAN = true;
+                } else {
+                    isConnectedToBrokerLAN = false;
+                }
+            }
+        } else {
+            isConnectedToBrokerLAN = false;
+        }
     }
 
     private boolean pause(int retryCount) {

@@ -5,7 +5,8 @@
     <string name="action_settings">Settings</string>
 
     <string name="tv_broker_host">Broker-Host:</string>
-    
+    <string name="tv_broker_host_lan">Broker-Host (LAN):</string>
+
     <string name="btn_start_service">start service</string>
     <string name="btn_stop_service">stop service</string>
 

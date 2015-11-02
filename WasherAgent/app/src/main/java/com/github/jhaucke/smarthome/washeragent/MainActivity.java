@@ -19,26 +19,30 @@ public class MainActivity extends AppCompatActivity {
     private Context context = this;
     private SharedPreferences sharedPreferences;
     private EditText etBrokerHost;
+    private EditText etBrokerHostLan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        etBrokerHost = (EditText) findViewById(R.id.et_broker_host);
         sharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
+        etBrokerHost = (EditText) findViewById(R.id.et_broker_host);
         etBrokerHost.setText(sharedPreferences.getString(Constants.KEY_BROKER_HOST, ""));
+        etBrokerHostLan = (EditText) findViewById(R.id.et_broker_host_lan);
+        etBrokerHostLan.setText(sharedPreferences.getString(Constants.KEY_BROKER_HOST_LAN, ""));
 
         Button btnStartService = (Button) findViewById(R.id.btn_start_service);
         btnStartService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String brokerHost = etBrokerHost.getText().toString().trim();
-                if (brokerHost.equals("")) {
+                String brokerHostLan = etBrokerHostLan.getText().toString().trim();
+                if (brokerHost.equals("") || brokerHostLan.equals("")) {
                     Toast.makeText(context, getResources().getString(R.string.toast_insert_broker_host), Toast.LENGTH_LONG).show();
                 } else {
 
-                    saveBrokerHost(brokerHost);
+                    saveBrokerHost(brokerHost, brokerHostLan);
                     Intent intent = new Intent(context, MqttService.class);
                     startService(intent);
                 }
@@ -54,9 +58,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void saveBrokerHost(String brokerHost) {
+    private void saveBrokerHost(String brokerHost, String brokerHostLan) {
         SharedPreferences.Editor preferencesEditor = sharedPreferences.edit();
         preferencesEditor.putString(Constants.KEY_BROKER_HOST, brokerHost);
+        preferencesEditor.putString(Constants.KEY_BROKER_HOST_LAN, brokerHostLan);
         preferencesEditor.commit();
     }
 

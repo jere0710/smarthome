@@ -8,6 +8,8 @@ public interface Constants {
 
     public static final String KEY_BROKER_HOST = APP + ".KEY_BROKER_HOST";
 
+    public static final String KEY_BROKER_HOST_LAN = APP + ".KEY_BROKER_HOST_LAN";
+
     public static final String RECONNECT_ALARM_ACTION = APP + ".RECONNECT_ALARM_ACTION";
 
     public static final String ACTION_KEEP_ALIVE_PING_SENDER = APP + ".ACTION_KEEP_ALIVE_PING_SENDER";

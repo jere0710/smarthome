@@ -41,8 +41,7 @@ public class MqttService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String brokerHost = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, MODE_PRIVATE).getString(Constants.KEY_BROKER_HOST, "");
-        client = new MyMqttClient(serviceContext, brokerHost);
+        client = new MyMqttClient(serviceContext);
         return Service.START_STICKY;
     }
 
